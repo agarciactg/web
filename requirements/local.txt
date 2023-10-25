@@ -1,0 +1,23 @@
+-r base.txt
+
+# Code quality
+# ------------------------------------------------------------------------------
+flake8==3.9.2  # https://github.com/PyCQA/flake8
+flake8-isort==4.0.0  # https://github.com/gforcada/flake8-isort
+coverage==5.5  # https://github.com/nedbat/coveragepy
+black==21.5b2  # https://github.com/ambv/black
+pylint-django==2.4.4  # https://github.com/PyCQA/pylint-django
+pylint-celery==0.3  # https://github.com/PyCQA/pylint-celery
+pre-commit==2.13.0  # https://github.com/pre-commit/pre-commit
+isort==5.8.0
+
+# Testing
+# ------------------------------------------------------------------------------
+pytest==6.2.4
+freezegun==1.1.0
+parameterized==0.8.1
+
+# Django
+# ------------------------------------------------------------------------------
+django-test-plus==2.2.0 # https://github.com/revsys/django-test-plus
+django-debug-toolbar==3.2.1  # https://github.com/jazzband/django-debug-toolbar

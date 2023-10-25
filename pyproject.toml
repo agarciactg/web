@@ -1,0 +1,16 @@
+[tool.black]
+line-length = 100
+skip-numeric-underscore-normalization = 1
+exclude = '(node_modules|migrations/)'
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = "True"
+force_grid_wrap = 0
+known_third_party = ""
+known_first_party = "web"
+default_section = "THIRDPARTY"
+use_parentheses = "True"
+line_length = 100
+skip_glob="**/node_modules/*, **/migrations/**"
+src_paths = ""
