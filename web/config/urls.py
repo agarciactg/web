@@ -10,6 +10,7 @@ urlpatterns = [
     path("api/v1/auth/token/", TokenObtainPairView.as_view()),
     path("api/v1/auth/token/refresh/", TokenRefreshView.as_view()),
     path("", include("web.apps.base.api.urls")),
+    path("", include("web.apps.users.api.urls")),
     # Temporary redirect
     path("", RedirectView.as_view(url="admin/")),
 ]
