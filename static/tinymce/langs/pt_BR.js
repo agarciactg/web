@@ -154,7 +154,7 @@ tinymce.addI18n('pt_BR',{
 "Open link in...": "Abrir link em...",
 "Current window": "Janela atual",
 "None": "Nenhum",
-"New window": "web janela",
+"New window": "Nova janela",
 "Remove link": "Remover link",
 "Anchors": "\u00c2ncoras",
 "Link...": "Link...",

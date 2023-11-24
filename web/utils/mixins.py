@@ -8,3 +8,8 @@ class APIBasePermissionsMixin:
 
 class APIWithUserPermissionsMixin:
     permission_classes = [IsAuthenticated & HasAPIKey]
+
+
+class APIWithCustomerPermissionsMixin:
+    permission_classes = [IsAuthenticated | HasAPIKey]
+    

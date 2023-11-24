@@ -285,7 +285,7 @@ tinymce.addI18n('cs',{
 "Extended Latin": "Roz\u0161\u00ed\u0159en\u00e9 Latin",
 "Symbols": "Symboly",
 "Arrows": "\u0160ipky",
-"User Defined": "Defiwebn\u00e9 u\u017eivatelem",
+"User Defined": "Definovan\u00e9 u\u017eivatelem",
 "dollar sign": "znak dolaru",
 "currency sign": "znak m\u011bny",
 "euro-currency sign": "znak m\u011bny euro",

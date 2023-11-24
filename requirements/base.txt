@@ -39,3 +39,6 @@ django-cors-headers==3.7.0
 djangorestframework==3.12.4
 djangorestframework-simplejwt==4.7.1
 djangorestframework-api-key==2.0.0
+django-rest-swagger==2.2.0
+drf-yasg2==1.19.4
+drf-rw-serializers==1.0.4

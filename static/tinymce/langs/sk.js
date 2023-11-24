@@ -1,5 +1,5 @@
 tinymce.addI18n('sk',{
-"Redo": "Zweb",
+"Redo": "Znova",
 "Undo": "Sp\u00e4\u0165",
 "Cut": "Vystrihn\u00fa\u0165",
 "Copy": "Kop\u00edrova\u0165",
@@ -285,7 +285,7 @@ tinymce.addI18n('sk',{
 "Extended Latin": "Roz\u0161\u00edren\u00e1 latinka",
 "Symbols": "Symboly",
 "Arrows": "\u0160\u00edpky",
-"User Defined": "Defiwebn\u00e9 pou\u017e\u00edvate\u013eom",
+"User Defined": "Definovan\u00e9 pou\u017e\u00edvate\u013eom",
 "dollar sign": "znak pre dol\u00e1r",
 "currency sign": "znak meny",
 "euro-currency sign": "znak eura",

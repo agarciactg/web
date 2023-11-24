@@ -154,7 +154,7 @@ tinymce.addI18n('ca',{
 "Open link in...": "Obrir l'enlla\u00e7 a...",
 "Current window": "Finestra actual",
 "None": "Cap",
-"New window": "Finestra web",
+"New window": "Finestra nova",
 "Remove link": "Treure enlla\u00e7",
 "Anchors": "\u00c0ncores",
 "Link...": "Enlla\u00e7...",

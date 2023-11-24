@@ -1,3 +1,8 @@
+from drf_yasg2 import openapi
+from drf_yasg2.utils import swagger_auto_schema
+
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+from rest_framework_simplejwt.views import TokenViewBase
 from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework.response import Response
@@ -12,11 +17,53 @@ from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from django.shortcuts import render
 
-
+from web.apps.base.api import serializers as base_serializer
 from web.apps.users.api import serializers
 from web.apps.users import models
-from web.apps.users import exceptions as users_exceptions
+from web.apps.users import exceptions as user_exceptions
 from web.utils import mixins
+
+
+class TokenObtainPairView(mixins.APIWithCustomerPermissionsMixin, TokenViewBase):
+    """
+    Return JWT tokens (access and refresh) for specific user based on username and password.
+    """
+
+    serializer_class = serializers.UserTokenObtainPairSerializer
+
+    @swagger_auto_schema(
+        operation_description="Endpoint para obtener un token.",
+        request_body=base_serializer.ExceptionSerializer(many=False),
+        responses={
+            200: serializers.SerializerTokenAuth(many=True),
+            401: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description="No tiene Autorización.",
+                schema=base_serializer.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": user_exceptions.UserUnauthorizedAPIException().get_full_details()
+                },
+            ),
+            404: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description="No tiene registro del Usuario.",
+                schema=base_serializer.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": user_exceptions.UserDoesNotExistsAPIException().get_full_details()
+                },
+            ),
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+
+class TokenRefreshView(mixins.APIWithCustomerPermissionsMixin, TokenViewBase):
+    """
+    Renew tokens (access and refresh) with new expire time based on specific user's access token.
+    """
+
+    serializer_class = TokenRefreshSerializer
 
 
 class UserDetailView(mixins.APIBasePermissionsMixin, generics.RetrieveAPIView):
@@ -30,11 +77,11 @@ class UserDetailView(mixins.APIBasePermissionsMixin, generics.RetrieveAPIView):
 
     def get(self, *args, **kwargs):
         if not self.request.user:
-            raise users_exceptions.UserDoesNotExistsAPIException()
+            raise user_exceptions.UserDoesNotExistsAPIException()
 
         user = models.User.objects.filter(username=self.request.user.username)
         if not user:
-            raise users_exceptions.UserDoesNotExistsAPIException()
+            raise user_exceptions.UserDoesNotExistsAPIException()
 
         serializer = serializers.UserDetailSerializer(self.request.user)
 
@@ -59,7 +106,10 @@ class PasswordResetView(mixins.APIBasePermissionsMixin, APIView):
                 token = token.replace("/", "_").replace("+", "-")
                 current_site = get_current_site(request)
                 mail_subject = "Recuperación de contraseña"
-                return render(request, './reset_password.html',)
+                return render(
+                    request,
+                    "./reset_password.html",
+                )
                 # message = render_to_string(
                 #     "web/templates/reset_password.html",
                 #     {

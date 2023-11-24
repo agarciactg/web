@@ -6,6 +6,8 @@ from web.apps.users.api import views
 app_name = "user_api"
 
 urlpatterns = [
+    path("api/v1/auth/token/", views.TokenObtainPairView.as_view()),
+    path("api/v1/auth/token/refresh/", views.TokenRefreshView.as_view()),
     path(
         "api/v1/auth/user/detail/",
         views.UserDetailView.as_view(),

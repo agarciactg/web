@@ -154,7 +154,7 @@ tinymce.addI18n('gl',{
 "Open link in...": "Abrir a ligaz\u00f3n en...",
 "Current window": "Xanela actual",
 "None": "Ning\u00fan",
-"New window": "web xanela",
+"New window": "Nova xanela",
 "Remove link": "Retirar a ligaz\u00f3n",
 "Anchors": "Ancoraxes",
 "Link...": "Ligaz\u00f3n...",

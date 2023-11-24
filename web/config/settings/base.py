@@ -39,6 +39,8 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework_api_key",
     "rest_framework_simplejwt",
+    "rest_framework_swagger",
+    "drf_yasg2",
     "corsheaders",
     "imagekit",
     "phonenumber_field",
@@ -277,3 +279,16 @@ ANYMAIL = {
 
 # SENTRY
 SENTRY_DSN_KEY = env.str("SENTRY_DSN_KEY")
+
+
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "Basic": {"type": "basic"},
+        "Bearer": {"type": "Bearer access", "name": "Authorization", "in": "header"},
+        "x-api-key": {"type": "string", "name": "x-api-key", "in": "header"},
+    },
+    'STATIC_URL': '/static/',
+}
+
+
+DJANGO_ALLOW_ASYNC_UNSAFE = env.bool("DJANGO_ALLOW_ASYNC_UNSAFE", True)
