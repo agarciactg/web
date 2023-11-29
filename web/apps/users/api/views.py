@@ -21,6 +21,7 @@ from web.apps.base.api import serializers as base_serializer
 from web.apps.users.api import serializers
 from web.apps.users import models
 from web.apps.users import exceptions as user_exceptions
+from web.apps.users import constanst as user_constants
 from web.utils import mixins
 
 
@@ -75,17 +76,83 @@ class UserDetailView(mixins.APIBasePermissionsMixin, generics.RetrieveAPIView):
     queryset = models.User.objects.all()
     pagination_class = None
 
+
+    @swagger_auto_schema(
+        operation_description="Endpoint para obtener el detalle de un docente por su id",
+        responses={
+            200: serializers.UserDetailSerializer(many=False),
+            401: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=user_constants.NOT_AUTORIZATION,
+                schema=base_serializer.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": user_exceptions.UserUnauthorizedAPIException().get_full_details()
+                },
+            ),
+            404: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description="",
+                schema=base_serializer.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": [
+                        user_exceptions.UserDoesNotExistsAPIException().get_full_details(),
+                    ]
+                },
+            ),
+        },
+    )
     def get(self, *args, **kwargs):
         if not self.request.user:
             raise user_exceptions.UserDoesNotExistsAPIException()
 
-        user = models.User.objects.filter(username=self.request.user.username)
-        if not user:
+        serializer = serializers.UserDetailSerializer(self.request.user)
+        return Response(data=serializer.data)
+
+
+class UserActionsAPIView(mixins.APIWithCustomerPermissionsMixin, APIView):
+    """
+    Endpoint to desactivate an user 
+    """
+
+    serializer_class = serializers.UserDetailSerializer
+
+    def get_objects(self, pk):
+        try:
+            return models.User.objects.get(id=pk)
+        except models.User.DoesNotExist:
             raise user_exceptions.UserDoesNotExistsAPIException()
 
-        serializer = serializers.UserDetailSerializer(self.request.user)
-
-        return Response(data=serializer.data)
+    @swagger_auto_schema(
+        operation_description="Endpoint para desactivar un usuario.",
+        responses={
+            200: serializers.UserDetailSerializer(many=True),
+            401: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description="No tiene Autorización.",
+                schema=base_serializer.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": user_exceptions.UserUnauthorizedAPIException().get_full_details()
+                },
+            ),
+            404: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description="No existe registro del Usuario",
+                schema=base_serializer.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": [
+                        user_exceptions.UserDoesNotExistsAPIException().get_full_details(),
+                    ]
+                },
+            ),
+        },
+    )
+    def delete(self, request, pk, format=None):
+        user = self.get_objects(pk)
+        if self.request.user.type_user == models.User.UserType.ADMIN:
+            user.is_active = False
+            user.save()
+            detail = serializers.UserDetailSerializer(user, many=False)
+            return Response(detail.data)
 
 
 class ChangePasswordView(mixins.APIBasePermissionsMixin, generics.UpdateAPIView):
@@ -128,3 +195,20 @@ class PasswordResetView(mixins.APIBasePermissionsMixin, APIView):
                     {"message": "Correo no encontrado"}, status=status.HTTP_404_NOT_FOUND
                 )
         return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
+
+
+class UserDetailAPIView(mixins.APIBasePermissionsMixin, generics.RetrieveAPIView):
+    """
+    Return: User Detail
+    """
+
+    serializer_class = serializers.UserDetailSerializer
+    queryset = models.User.objects.all()
+    pagination_class = None
+
+    def get(self, *args, **kwargs):
+        if not self.request.user:
+            raise user_exceptions.UserDoesNotExistsAPIException()
+        
+        serializer = serializers.UserDetailSerializer(self.request.user)
+        return Response(data=serializer.data)

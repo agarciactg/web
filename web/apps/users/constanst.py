@@ -1,0 +1,1 @@
+NOT_AUTORIZATION="No tiene autorización"
