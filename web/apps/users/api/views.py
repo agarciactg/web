@@ -123,6 +123,76 @@ class UserActionsAPIView(mixins.APIWithCustomerPermissionsMixin, APIView):
             raise user_exceptions.UserDoesNotExistsAPIException()
 
     @swagger_auto_schema(
+        operation_description="Endpoint para obtener el detalle de una usuario.",
+        responses={
+            200: serializers.UserDetailSerializer(many=True),
+            401: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=user_constants.NOT_AUTORIZATION,
+                schema=base_serializer.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": user_exceptions.UserUnauthorizedAPIException().get_full_details()
+                },
+            ),
+            404: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=user_constants.NOT_EXIST_REGISTED_USER,
+                schema=base_serializer.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": [
+                        user_exceptions.UserDoesNotExistsAPIException().get_full_details()
+                    ]
+                },
+            ),
+        },
+    )
+    def get(self, request, pk, format=None):
+        user = self.get_objects(pk)
+        serializer = serializers.UserDetailSerializer(user)
+        return Response(serializer.data)
+
+
+    @swagger_auto_schema(
+        operation_description="Endpoint para actualizar una institucion",
+        request_body=base_serializer.ExceptionSerializer(many=False),
+        responses={
+            200: serializers.UserDetailSerializer(many=True),
+            401: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description="",
+                schema=base_serializer.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": user_exceptions.UserUnauthorizedAPIException().get_full_details()
+                },
+            ),
+            404: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description="",
+                schema=base_serializer.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": [
+                        user_exceptions.UserDoesNotExistsAPIException().get_full_details()
+                    ]
+                },
+            ),
+        },
+    )
+    def put(self, request, pk, format=None):
+        user = self.get_objects(pk)
+        serializer = serializers.UserDetailSerializer(
+            user,
+            data=request.data,
+            partial=True,
+            context={}
+        )
+        if serializer.is_valid(raise_exception=True):
+            user_updated = serializer.save()
+            detail = serializers.UserDetailSerializer(user_updated, many=False)
+            return Response(detail.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    @swagger_auto_schema(
         operation_description="Endpoint para desactivar un usuario.",
         responses={
             200: serializers.UserDetailSerializer(many=True),
@@ -153,12 +223,20 @@ class UserActionsAPIView(mixins.APIWithCustomerPermissionsMixin, APIView):
             user.save()
             detail = serializers.UserDetailSerializer(user, many=False)
             return Response(detail.data)
+        
+        return Response(
+            {"message": "Solo el administrador puede eliminar un usuario"}, status=status.HTTP_403_FORBIDDEN
+        )
 
 
 class ChangePasswordView(mixins.APIBasePermissionsMixin, generics.UpdateAPIView):
     queryset = models.User.objects.all()
     permission_class = (IsAuthenticated,)
     serializer_class = serializers.ChangePasswordSerializer
+
+    def update(self, request, *args, **kwargs):
+        print(request, "++++++++++++++++++++++++")
+        return super().update(request, *args, **kwargs)
 
 
 class PasswordResetView(mixins.APIBasePermissionsMixin, APIView):
