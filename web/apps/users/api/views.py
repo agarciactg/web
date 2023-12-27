@@ -1,27 +1,26 @@
+import os
+from django.core.mail import EmailMessage
 from drf_yasg2 import openapi
 from drf_yasg2.utils import swagger_auto_schema
 
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.views import TokenViewBase
+
 from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-from django.contrib.auth.tokens import default_token_generator
-from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.template.loader import render_to_string
-from django.core.mail import send_mail
-from django.shortcuts import render
 
 from web.apps.base.api import serializers as base_serializer
 from web.apps.users.api import serializers
 from web.apps.users import models
 from web.apps.users import exceptions as user_exceptions
 from web.apps.users import constanst as user_constants
+from web.config.settings.base import BASE_DIR
 from web.utils import mixins
 
 
@@ -76,7 +75,6 @@ class UserDetailView(mixins.APIBasePermissionsMixin, generics.RetrieveAPIView):
     queryset = models.User.objects.all()
     pagination_class = None
 
-
     @swagger_auto_schema(
         operation_description="Endpoint para obtener el detalle de un docente por su id",
         responses={
@@ -111,7 +109,7 @@ class UserDetailView(mixins.APIBasePermissionsMixin, generics.RetrieveAPIView):
 
 class UserActionsAPIView(mixins.APIWithCustomerPermissionsMixin, APIView):
     """
-    Endpoint to desactivate an user 
+    Endpoint to desactivate an user
     """
 
     serializer_class = serializers.UserDetailSerializer
@@ -151,7 +149,6 @@ class UserActionsAPIView(mixins.APIWithCustomerPermissionsMixin, APIView):
         serializer = serializers.UserDetailSerializer(user)
         return Response(serializer.data)
 
-
     @swagger_auto_schema(
         operation_description="Endpoint para actualizar una institucion",
         request_body=base_serializer.ExceptionSerializer(many=False),
@@ -180,17 +177,13 @@ class UserActionsAPIView(mixins.APIWithCustomerPermissionsMixin, APIView):
     def put(self, request, pk, format=None):
         user = self.get_objects(pk)
         serializer = serializers.UserDetailSerializer(
-            user,
-            data=request.data,
-            partial=True,
-            context={}
+            user, data=request.data, partial=True, context={}
         )
         if serializer.is_valid(raise_exception=True):
             user_updated = serializer.save()
             detail = serializers.UserDetailSerializer(user_updated, many=False)
             return Response(detail.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
     @swagger_auto_schema(
         operation_description="Endpoint para desactivar un usuario.",
@@ -223,9 +216,10 @@ class UserActionsAPIView(mixins.APIWithCustomerPermissionsMixin, APIView):
             user.save()
             detail = serializers.UserDetailSerializer(user, many=False)
             return Response(detail.data)
-        
+
         return Response(
-            {"message": "Solo el administrador puede eliminar un usuario"}, status=status.HTTP_403_FORBIDDEN
+            {"message": "Solo el administrador puede eliminar un usuario"},
+            status=status.HTTP_403_FORBIDDEN,
         )
 
 
@@ -235,44 +229,67 @@ class ChangePasswordView(mixins.APIBasePermissionsMixin, generics.UpdateAPIView)
     serializer_class = serializers.ChangePasswordSerializer
 
     def update(self, request, *args, **kwargs):
-        print(request, "++++++++++++++++++++++++")
         return super().update(request, *args, **kwargs)
 
 
-class PasswordResetView(mixins.APIBasePermissionsMixin, APIView):
-    def post(self, request):
+class PasswordResetRequestView(mixins.APIWithCustomerPermissionsMixin, APIView):
+    def post(self, request, *args, **kwargs):
         serializer = serializers.PasswordResetSerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data["email"]
-            user = models.User.objects.filter(email=email).first()
-            if user:
-                uid = urlsafe_base64_encode(force_bytes(user.pk))
-                token = default_token_generator.make_token(user)
-                token = token.replace("/", "_").replace("+", "-")
-                current_site = get_current_site(request)
-                mail_subject = "Recuperación de contraseña"
-                return render(
-                    request,
-                    "./reset_password.html",
-                )
-                # message = render_to_string(
-                #     "web/templates/reset_password.html",
-                #     {
-                #         "user": user,
-                #         "domain": current_site.domain,
-                #         "uid": uid,
-                #         "token": token,
-                #     },
-                # )
-                # send_mail(mail_subject, message, "cajolod623@wanbeiz.com", [email])
-                # return Response(
-                #     {"message": "Correo de recuperación enviado"}, status=status.HTTP_200_OK
-                # )
-            else:
-                return Response(
-                    {"message": "Correo no encontrado"}, status=status.HTTP_404_NOT_FOUND
-                )
-        return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+        user = models.User.objects.filter(email=email).first()
+
+        if user:
+            token_generator = PasswordResetTokenGenerator()
+            uidb64 = user.uuid
+            token = token_generator.make_token(user)
+
+            reset_url = f"http://localhost:8000/api/v1/reset-password/confirm/{uidb64}/{token}/"
+
+            # template message
+            email_body = render_to_string(
+                os.path.join(BASE_DIR, "templates") + "/reset_password.html",
+                {"user": user, "reset_url": reset_url},
+            )
+
+            mail = EmailMessage(
+                "Restablecimiento de Contraseña", email_body, "agarciacompanyctg@gmail.com", [email]
+            )
+            mail.content_subtype = 'html'
+            mail.send()
+            return Response(
+                {"detail": "Enlace de restablecimiento enviado correctamente."},
+                status=status.HTTP_200_OK,
+            )
+
+        else:
+            return Response(
+                {"error": "No existe un usuario con este correo electrónico."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+
+class passwordResetConfirmView(mixins.APIWithCustomerPermissionsMixin, APIView):
+    def post(self, request, uidb64, token):
+        user = models.User.objects.filter(uuid=uidb64).first()
+
+        if user and PasswordResetTokenGenerator().check_token(user, token):
+            serializer = serializers.SetPasswordSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
+            new_password = serializer.validated_data["password"]
+            user.set_password(new_password)
+            user.save()
+            return Response(
+                {"detail": "Contraseña restablecida correctamente."}, status=status.HTTP_200_OK
+            )
+
+        else:
+            return Response(
+                {"error": "Enlace de restablecimiento no válido."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class UserDetailAPIView(mixins.APIBasePermissionsMixin, generics.RetrieveAPIView):
@@ -287,6 +304,6 @@ class UserDetailAPIView(mixins.APIBasePermissionsMixin, generics.RetrieveAPIView
     def get(self, *args, **kwargs):
         if not self.request.user:
             raise user_exceptions.UserDoesNotExistsAPIException()
-        
+
         serializer = serializers.UserDetailSerializer(self.request.user)
         return Response(data=serializer.data)

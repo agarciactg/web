@@ -267,11 +267,21 @@ INFO_AUTO_URL_BASE = env.str("INFO_AUTO_URL_BASE")
 # SENDGRID
 SENDGRID_API_KEY = env.str("SENDGRID_API_KEY")
 
-# Config Mail
-EMAIL_SUBJECT_PREFIX = "Dashboard "
-EMAIL_BACKEND = "anymail.backends.sendgrid.EmailBackend"
-DEFAULT_FROM_EMAIL = "Dashboard <contact@lsv.com>"
-SERVER_EMAIL = "tech@lsv.com"  # default from-email for Django errors
+# # Config Mail
+# EMAIL_SUBJECT_PREFIX = "Dashboard "
+# EMAIL_BACKEND = "anymail.backends.sendgrid.EmailBackend"
+# DEFAULT_FROM_EMAIL = "Dashboard <contact@web.com>"
+# SERVER_EMAIL = "tech@web.com"  # default from-email for Django errors
+
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'agarciacompanyctg@gmail.com'
+EMAIL_HOST_PASSWORD = 'snyxbldundfwedqm'
+
 
 ANYMAIL = {
     "SENDGRID_API_KEY": SENDGRID_API_KEY,

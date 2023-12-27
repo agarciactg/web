@@ -85,3 +85,8 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
 
 class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField()
+
+
+class SetPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField()
+    confirm_password = serializers.CharField()
