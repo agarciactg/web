@@ -233,6 +233,29 @@ class ChangePasswordView(mixins.APIBasePermissionsMixin, generics.UpdateAPIView)
 
 
 class PasswordResetRequestView(mixins.APIWithCustomerPermissionsMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Endpoint para restablecer contraseña via email.",
+        request_body=base_serializer.ExceptionSerializer(many=False),
+        responses={
+            200: serializers.PasswordResetSerializer(many=True),
+            401: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description="No tiene Autorización.",
+                schema=base_serializer.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": user_exceptions.UserUnauthorizedAPIException().get_full_details()
+                },
+            ),
+            404: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description="No tiene registro del Usuario.",
+                schema=base_serializer.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": user_exceptions.UserDoesNotExistsAPIException().get_full_details()
+                },
+            ),
+        },
+    )
     def post(self, request, *args, **kwargs):
         serializer = serializers.PasswordResetSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -245,7 +268,7 @@ class PasswordResetRequestView(mixins.APIWithCustomerPermissionsMixin, APIView):
             uidb64 = user.uuid
             token = token_generator.make_token(user)
 
-            reset_url = f"http://localhost:8000/api/v1/reset-password/confirm/{uidb64}/{token}/"
+            reset_url = f"{request.build_absolute_uri()}confirm/{uidb64}/{token}/"
 
             # template message
             email_body = render_to_string(
@@ -256,7 +279,7 @@ class PasswordResetRequestView(mixins.APIWithCustomerPermissionsMixin, APIView):
             mail = EmailMessage(
                 "Restablecimiento de Contraseña", email_body, "agarciacompanyctg@gmail.com", [email]
             )
-            mail.content_subtype = 'html'
+            mail.content_subtype = "html"
             mail.send()
             return Response(
                 {"detail": "Enlace de restablecimiento enviado correctamente."},
@@ -271,6 +294,29 @@ class PasswordResetRequestView(mixins.APIWithCustomerPermissionsMixin, APIView):
 
 
 class passwordResetConfirmView(mixins.APIWithCustomerPermissionsMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Endpoint para cambiar la contrase segun el acceso del email.",
+        request_body=base_serializer.ExceptionSerializer(many=False),
+        responses={
+            200: serializers.SetPasswordSerializer(many=True),
+            401: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description="No tiene Autorización.",
+                schema=base_serializer.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": user_exceptions.UserUnauthorizedAPIException().get_full_details()
+                },
+            ),
+            404: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description="No tiene registro del Usuario.",
+                schema=base_serializer.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": user_exceptions.UserDoesNotExistsAPIException().get_full_details()
+                },
+            ),
+        },
+    )
     def post(self, request, uidb64, token):
         user = models.User.objects.filter(uuid=uidb64).first()
 
