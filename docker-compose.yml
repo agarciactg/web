@@ -9,10 +9,10 @@ services:
     volumes:
       - .data/:/tmp
     environment:
-      POSTGRES_DB: web_db
+      POSTGRES_DB: web_db_pnd6
       POSTGRES_USER: web_user
       POSTGRES_PORT: 5432
-      POSTGRES_PASSWORD: web_password
+      POSTGRES_PASSWORD: 66up9x2JFb71tdpNYz2RTEPsHCpLLC55
       PGDATA: /tmp
 
   redis:
