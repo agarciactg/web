@@ -11,11 +11,13 @@ ENV DJANGO_SETTINGS_MODULE=$django_settings
 ENV DJANGO_PORT=8000
 
 RUN mkdir /backend /var/secrets
-WORKDIR backend
+WORKDIR /backend
 
 RUN apt-get update \
     && apt-get install -y python3-dev musl-dev
 
+# Instalar docker-compose
+RUN apt-get install -y docker-compose
 
 # Copia requirements
 COPY ./requirements/ /backend/requirements/
