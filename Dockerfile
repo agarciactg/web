@@ -27,11 +27,11 @@ RUN pip install -r /backend/requirements/${TARGET_ENV}.txt
 # Copia proyecto
 COPY . .
 
-COPY build.sh /backend/build.sh
+# COPY build.sh /backend/build.sh
 
-RUN chmod +x /backend/build.sh
+# RUN chmod +x /backend/build.sh
 
-RUN /backend/build.sh
+# RUN /backend/build.sh
 
 RUN addgroup --gid 1000 docker \
     && adduser --gid 1000 --uid 1000 --disabled-password --gecos "" --quiet docker \
