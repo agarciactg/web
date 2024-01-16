@@ -11,10 +11,11 @@ ENV DJANGO_SETTINGS_MODULE=$django_settings
 ENV DJANGO_PORT=8000
 
 RUN mkdir /backend /var/secrets
-WORKDIR /backend
+WORKDIR backend
 
 RUN apt-get update \
     && apt-get install -y python3-dev musl-dev
+
 
 # Copia requirements
 COPY ./requirements/ /backend/requirements/
@@ -24,18 +25,8 @@ RUN pip install -r /backend/requirements/${TARGET_ENV}.txt
 # Copia proyecto
 COPY . .
 
-# Descomentar estas líneas si necesitas ejecutar comandos personalizados
-# COPY build.sh /backend/build.sh
-# RUN chmod +x /backend/build.sh
-# RUN /backend/build.sh
-
-# Comprobar si el grupo docker ya existe antes de intentar crearlo
-RUN groupadd -g 1000 docker || true
-
-# Comprobar si el usuario docker ya existe antes de intentar crearlo
-RUN useradd -g 1000 -u 1000 --no-create-home --quiet docker || true
-
-# Cambiar la propiedad del directorio a docker
-RUN chown -R docker:docker /var/secrets /backend || true
+RUN addgroup --gid 1000 docker \
+    && adduser --gid 1000 --uid 1000 --disabled-password --gecos "" --quiet docker \
+    && chown -R docker:docker /var/secrets /backend
 
 USER docker
