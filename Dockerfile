@@ -30,12 +30,12 @@ COPY . .
 # RUN /backend/build.sh
 
 # Comprobar si el grupo docker ya existe antes de intentar crearlo
-RUN getent group docker || groupadd -g 1000 docker
+RUN groupadd -g 1000 docker || true
 
 # Comprobar si el usuario docker ya existe antes de intentar crearlo
-RUN id -u docker &>/dev/null || useradd -g 1000 -u 1000 --no-create-home --quiet docker
+RUN useradd -g 1000 -u 1000 --no-create-home --quiet docker || true
 
 # Cambiar la propiedad del directorio a docker
-RUN chown -R docker:docker /var/secrets /backend
+RUN chown -R docker:docker /var/secrets /backend || true
 
 USER docker
