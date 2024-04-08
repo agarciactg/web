@@ -2,6 +2,7 @@ from django.core.mail import EmailMessage
 from django.db import models
 
 from web.apps.base import managers
+from web.apps.users import models as models_user
 
 
 class BaseModel(models.Model):
@@ -103,3 +104,16 @@ class EmailTemplate(models.Model):
             email.template_id = self.sengrid_id
             email.merge_global_data = context
             email.send()
+
+
+class Session(BaseModel):
+    user = models.ForeignKey(models_user.User, on_delete=models.PROTECT, verbose_name="usuarios")
+    time_sesion = models.TimeField(verbose_name="tiempo en sesion")
+
+    def __str__(self):
+        return f"{self.time_sesion} - {self.user.username}"
+
+    class Meta:
+        verbose_name = "Sesion"
+        verbose_name_plural = "Sesiones"
+        ordering = ["id"]

@@ -11,14 +11,11 @@ from imagekit.processors import ResizeToFill
 from imagekit.models import ProcessedImageField
 
 
-from web.apps.base.models import BaseModel
-
-
 class UserManager(DjangoUserManager):
     def create_user(self, username, type_user, first_name, last_name, email="", password=None):
-        if int(type_user) == User.EMPLOYEE:
-            if not username or not username.isdigit():
-                raise ValueError("Users must have an number document")
+        # if int(type_user) == User.EMPLOYEE:
+        #     if not username or not username.isdigit():
+        #         raise ValueError("Users must have an number document")
 
         return super().create_user(
             username,
@@ -93,18 +90,18 @@ class User(AbstractUser):
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["first_name", "last_name", "type_user"]
 
-    @property
-    def current_institution(self):
-        """
-        :return Staff
-        :rtype: StaffInstitutions
-        """
-        try:
-            institution = (
-                self.user_staff.select_related("institution")
-                .filter(status=BaseModel.Status.ACTIVE)
-                .latest("date_created")
-            )
-            return institution
-        except ObjectDoesNotExist:
-            return None
+    # @property
+    # def current_institution(self):
+    #     """
+    #     :return Staff
+    #     :rtype: StaffInstitutions
+    #     """
+    #     try:
+    #         institution = (
+    #             self.user_staff.select_related("institution")
+    #             .filter(status=BaseModel.Status.ACTIVE)
+    #             .latest("date_created")
+    #         )
+    #         return institution
+    #     except ObjectDoesNotExist:
+    #         return None
