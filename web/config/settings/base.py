@@ -247,6 +247,7 @@ MATERIAL_ADMIN_SITE = {
     "SHOW_COUNTS": True,
     "APP_ICONS": {
         "users": "person",
+        "teacher": "record_voice_over",
         "rest_framework_api_key": "lock",
         "django_celery_beat": "history",
     },
