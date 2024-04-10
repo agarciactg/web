@@ -26,6 +26,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("web.apps.base.api.urls")),
     path("", include("web.apps.users.api.urls")),
+    path("", include("web.apps.teacher.api.urls")),
     # Temporary redirect
     path("", RedirectView.as_view(url="admin/")),
     # Documentation
