@@ -60,6 +60,7 @@ LOCAL_APPS = [
     "web.apps.base",
     "web.apps.users",
     "web.apps.teacher",
+    "web.apps.enrollments",
     "web.apps.vendors",
     
 ]
@@ -248,6 +249,7 @@ MATERIAL_ADMIN_SITE = {
     "APP_ICONS": {
         "users": "person",
         "teacher": "record_voice_over",
+        "enrollments": "speaker",
         "rest_framework_api_key": "lock",
         "django_celery_beat": "history",
     },
