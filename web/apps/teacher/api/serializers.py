@@ -48,16 +48,22 @@ class TeacherCreateActionSerializer(serializers.Serializer):
         if self.context["is_create"]:
             if (
                 models_users.User.objects.filter(username=data["username"]).exists()
+                or models.Teacher.objects.filter(user__document_number=data["document_number"]).exists()
             ):
                 raise exceptions.TeacherAlreadyExistsException()
         else:
             current_teacher = self.context["current_user"]
             if (
-                current_teacher.user.username != data.get("username")
+                current_teacher.user.document_number != data.get("document_number")
+                or current_teacher.user.username != data.get("username")
             ) and (
                 models_users.User.objects.filter(username=data.get("username"))
                 .exclude(id=current_teacher.user.id)
                 .exists()
+                or models.Teacher.objects.filter(document_number=data.get("document_number"))
+                .exclude(id=current_teacher.id)
+                .exists()
+
             ):
                 raise exceptions.TeacherAlreadyExistsException()
 
@@ -70,6 +76,8 @@ class TeacherCreateActionSerializer(serializers.Serializer):
                 "type_user": models_users.User.UserType.TEACHER,
                 "first_name": validated_data.pop("first_name"),
                 "last_name": validated_data.pop("last_name"),
+                "type_document": validated_data.pop("type_document"),
+                "document_number": validated_data.pop("document_number"),
                 "email": validated_data.pop("email"),
                 "avatar": validated_data.pop("avatar", None),
                 "avatar_url": validated_data.pop("avatar_url", None),
@@ -94,6 +102,8 @@ class TeacherCreateActionSerializer(serializers.Serializer):
             user.username = validated_data.get("username", user.username)
             user.first_name = validated_data.get("first_name", user.first_name)
             user.last_name = validated_data.get("last_name", user.last_name)
+            user.type_document = validated_data.get("type_document", user.type_document)
+            user.document_number = validated_data.get("document_number", user.document_number)
             user.email = validated_data.get("email", user.email)
             user.avatar = validated_data.get("avatar", user.avatar)
             user.avatar_url = validated_data.get("avatar_url", user.avatar_url)

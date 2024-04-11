@@ -60,6 +60,12 @@ class User(AbstractUser):
         INSTITUTION_STAFF = 7, "Otro"
         COORDINATOR = 8, "Coordinador"
 
+    class TypeDocument(models.IntegerChoices):
+        CC = 0, "Cedula de Ciudadania"
+        TI = 1, "Tarjeta de Identidad"
+        PS = 2, "Pasaporte"
+        NA = 3, "Otro"
+
     uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False, db_index=True)
     type_user = models.PositiveSmallIntegerField(
         verbose_name="Tipo de Usuario",
@@ -72,11 +78,18 @@ class User(AbstractUser):
         unique=True,
         help_text="Numero de cedula para Cliente",
     )
+    type_document = models.PositiveSmallIntegerField(
+        verbose_name="Tipo de Identificacion",
+        help_text="Escoja su tipo de identificacions",
+        choices=TypeDocument.choices,
+        null=True,
+        blank=True
+    )
     document_number = models.IntegerField(
         verbose_name="Numero de Documento",
         validators=[MinLengthValidator(5), MaxLengthValidator(12)],
         null=True,
-        blank=True
+        blank=True,
     )
     avatar = ProcessedImageField(
         verbose_name="Foto de Perfil",

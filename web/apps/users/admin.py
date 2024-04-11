@@ -78,6 +78,7 @@ class UserAdmin(BaseUserAdmin):
                     "type_user",
                     "first_name",
                     "last_name",
+                    "type_document",
                     "document_number",
                     "password1",
                     "password2",
