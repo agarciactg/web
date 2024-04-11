@@ -59,7 +59,7 @@ class TeacherCreateActionSerializer(serializers.Serializer):
                 .exclude(id=current_teacher.user.id)
                 .exists()
             ):
-                raise exceptions.Tea cherAlreadyExistsException()
+                raise exceptions.TeacherAlreadyExistsException()
 
         return data
 
