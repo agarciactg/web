@@ -4,10 +4,10 @@ from rest_framework.views import APIView
 
 
 from web.apps.base.api import serializers as serializers_base
+from web.apps.base import models as models_base
 from web.apps.base.utils import StandardResultsPagination
 from web.apps.teacher import exceptions, models, constanst
-from web.apps.users import constanst as constanst_users
-from web.apps.users import exceptions as exceptions_users
+from web.apps.users import constanst as constanst_users, exceptions as exceptions_users
 from web.utils.mixins import APIWithCustomerPermissionsMixin
 from web.apps.teacher.api import serializers
 from drf_yasg2.utils import swagger_auto_schema
@@ -130,3 +130,34 @@ class TeacherActionsAPIView(APIWithCustomerPermissionsMixin, APIView):
             detail = serializers.TeacherDetailSerializer(teacher_updated, many=False)
             return Response(detail.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        operation_description="Endpoint para desactivar un Profesor",
+        request_body=serializers_base.ExceptionSerializer(many=False),
+        responses={
+            200: serializers.TeacherCreateActionSerializer(many=True),
+            401: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=constanst_users.NOT_AUTORIZATION,
+                schema=serializers_base.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": exceptions_users.UserUnauthorizedAPIException().get_full_details()
+                },
+            ),
+            404: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=constanst.NOT_EXIST_REGISTED_TEACHER,
+                schema=serializers_base.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": [
+                        exceptions.TeacherDoesNotExistsAPIException().get_full_details()
+                    ]
+                },
+            ),
+        },
+    )
+    def delete(self, request, id, format=None):
+        teacher = self.get_objects(id)
+        teacher.status = models_base.BaseModel.Status.INACTIVE
+        teacher.save()
+        return Response({"id": teacher.id, "status": teacher.status.name})
