@@ -50,20 +50,16 @@ class TeacherCreateActionSerializer(serializers.Serializer):
                 models_users.User.objects.filter(username=data["username"]).exists()
             ):
                 raise exceptions.TeacherAlreadyExistsException()
-        # else:
-        #     current_teacher = self.context["current_user"]
-        #     if (
-        #         current_teacher.document_number != data.get("document_number")
-        #         or current_teacher.user.username != data.get("username")
-        #     ) and (
-        #         models_users.User.objects.filter(username=data.get("username"))
-        #         .exclude(id=current_teacher.user.id)
-        #         .exists()
-        #         or models.Teacher.objects.filter(document_number=data.get("document_number"))
-        #         .exclude(id=current_teacher.id)
-        #         .exists()
-        #     ):
-        #         raise exceptions.TeacherAlreadyExistsException()
+        else:
+            current_teacher = self.context["current_user"]
+            if (
+                current_teacher.user.username != data.get("username")
+            ) and (
+                models_users.User.objects.filter(username=data.get("username"))
+                .exclude(id=current_teacher.user.id)
+                .exists()
+            ):
+                raise exceptions.Tea cherAlreadyExistsException()
 
         return data
 
@@ -107,7 +103,6 @@ class TeacherCreateActionSerializer(serializers.Serializer):
                 user.set_password(str(password))
             user.save()
 
-            teacher.city = validated_data.get("city", teacher.city)
             teacher.profession = validated_data.get("profession", teacher.profession)
             teacher.is_full_time = validated_data.get(
                 "is_full_time", teacher.is_full_time
