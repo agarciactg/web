@@ -4,6 +4,7 @@ import uuid
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as DjangoUserManager
 from django.db import models
+from django.core.validators import MinLengthValidator, MaxLengthValidator
 
 from web.apps.users.files import user_avatar_image_path
 from imagekit.processors import ResizeToFill
@@ -70,6 +71,12 @@ class User(AbstractUser):
         verbose_name="Username",
         unique=True,
         help_text="Numero de cedula para Cliente",
+    )
+    document_number = models.IntegerField(
+        verbose_name="Numero de Documento",
+        validators=[MinLengthValidator(5), MaxLengthValidator(12)],
+        null=True,
+        blank=True
     )
     avatar = ProcessedImageField(
         verbose_name="Foto de Perfil",

@@ -13,6 +13,7 @@ class TeacherAdmin(ModelAdmin):
         "user",
         "profession",
         "is_full_time",
+        "status"
     )
     search_fields = (
         "user__username",
@@ -43,7 +44,7 @@ class TeacherAdmin(ModelAdmin):
 
 @register(models.Subject)
 class SubjectAdmin(ModelAdmin):
-    list_display = ("id", "teacher", "name", "credis", "hours")
+    list_display = ("id", "teacher", "name", "credis", "hours", "status")
     search_fields = (
         "teacher__user__username",
         "teacher__user__first_name",
