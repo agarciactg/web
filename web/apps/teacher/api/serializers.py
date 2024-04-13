@@ -28,6 +28,8 @@ class TeacherCreateActionSerializer(serializers.Serializer):
     first_name = serializers.CharField(write_only=True)
     last_name = serializers.CharField(write_only=True)
     email = serializers.EmailField(write_only=True, max_length=250, required=True)
+    type_document = serializers.IntegerField(write_only=True)
+    document_number = serializers.IntegerField(write_only=True)
     avatar = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
     avatar_url = serializers.URLField(
         write_only=True, allow_null=True, allow_blank=True, required=False
@@ -45,13 +47,17 @@ class TeacherCreateActionSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
+
         if self.context["is_create"]:
             if (
                 models_users.User.objects.filter(username=data["username"]).exists()
-                or models.Teacher.objects.filter(user__document_number=data["document_number"]).exists()
+                or models.Teacher.objects.filter(
+                    user__document_number=data["document_number"]
+                ).exists()
             ):
                 raise exceptions.TeacherAlreadyExistsException()
         else:
+
             current_teacher = self.context["current_user"]
             if (
                 current_teacher.user.document_number != data.get("document_number")
@@ -60,11 +66,15 @@ class TeacherCreateActionSerializer(serializers.Serializer):
                 models_users.User.objects.filter(username=data.get("username"))
                 .exclude(id=current_teacher.user.id)
                 .exists()
-                or models.Teacher.objects.filter(document_number=data.get("document_number"))
-                .exclude(id=current_teacher.id)
-                .exists()
-
             ):
+                if "document_number" in data:
+                    if (
+                        models.Teacher.objects.filter(document_number=data.get("document_number"))
+                        .exclude(id=current_teacher.id)
+                        .exists()
+                    ):
+                        raise exceptions.TeacherAlreadyExistsException()
+
                 raise exceptions.TeacherAlreadyExistsException()
 
         return data
@@ -114,9 +124,7 @@ class TeacherCreateActionSerializer(serializers.Serializer):
             user.save()
 
             teacher.profession = validated_data.get("profession", teacher.profession)
-            teacher.is_full_time = validated_data.get(
-                "is_full_time", teacher.is_full_time
-            )
+            teacher.is_full_time = validated_data.get("is_full_time", teacher.is_full_time)
             teacher.save()
 
             return teacher

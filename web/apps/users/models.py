@@ -108,19 +108,3 @@ class User(AbstractUser):
 
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["first_name", "last_name", "type_user"]
-
-    # @property
-    # def current_institution(self):
-    #     """
-    #     :return Staff
-    #     :rtype: StaffInstitutions
-    #     """
-    #     try:
-    #         institution = (
-    #             self.user_staff.select_related("institution")
-    #             .filter(status=BaseModel.Status.ACTIVE)
-    #             .latest("date_created")
-    #         )
-    #         return institution
-    #     except ObjectDoesNotExist:
-    #         return None

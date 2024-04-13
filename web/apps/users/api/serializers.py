@@ -32,6 +32,8 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "username",
+            "type_document",
+            "document_number",
             "email",
             "avatar",
             "avatar_url",
@@ -49,6 +51,8 @@ class UserDetailSummarySerializer(serializers.ModelSerializer):
             "type_user",
             "first_name",
             "last_name",
+            "type_document",
+            "document_number",
         )
 
 
