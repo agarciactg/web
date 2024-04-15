@@ -16,3 +16,9 @@ class TeacherAlreadyExistsException(BaseAPIException):
     status_code = 400
     default_detail = "Ya existe un docente con los datos ingresados"
     default_code = "TEACHER_ALREADY_EXIST"
+
+
+class SubjectsDoesNotExistsAPIException(BaseAPIException):
+    status_code = 404
+    default_detail = "No Existe registro de la Asignatura"
+    default_code = "SUBJECT_DOES_NOT_EXIST"

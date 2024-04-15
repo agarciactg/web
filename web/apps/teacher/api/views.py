@@ -161,3 +161,147 @@ class TeacherActionsAPIView(APIWithCustomerPermissionsMixin, APIView):
         teacher.status = models_base.BaseModel.Status.INACTIVE
         teacher.save()
         return Response({"id": teacher.id, "status": teacher.status.name})
+
+
+class SubjectsCreateAPIView(APIWithCustomerPermissionsMixin, generics.ListAPIView):
+    pagination_class = StandardResultsPagination
+    serializer_class = serializers.SubjectSerializer
+
+    @swagger_auto_schema(
+        operation_description="Endpoint para crear una Asignatura.",
+        request_body=serializers_base.ExceptionSerializer(many=False),
+        responses={
+            200: serializers.SubjectSerializer(many=False),
+            401: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=constanst_users.NOT_AUTORIZATION,
+                schema=serializers_base.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": exceptions_users.UserUnauthorizedAPIException().get_full_details()
+                },
+            ),
+            404: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=constanst_users.NOT_EXIST_REGISTED_USER,
+                schema=serializers_base.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": exceptions_users.UserDoesNotExistsAPIException().get_full_details()
+                },
+            ),
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = serializers.SubjectSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        subject = serializer.save()
+        detail = serializers.SubjectSerializer(subject, many=False)
+        return Response(detail.data)
+
+
+class SubjectActionsAPIView(APIWithCustomerPermissionsMixin, APIView):
+    pagination_class = StandardResultsPagination
+    serializer_class = serializers.SubjectSerializer
+
+    def get_objects(self, id):
+        try:
+            return models.Subject.objects.get(id=id)
+        except models.Subject.DoesNotExist:
+            raise exceptions.SubjectsDoesNotExistsAPIException()
+
+    @swagger_auto_schema(
+        operation_description="Endpoint para obtener el detalle de una asignatura.",
+        responses={
+            200: serializers.SubjectSerializer(many=True),
+            401: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=constanst_users.NOT_AUTORIZATION,
+                schema=serializers_base.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": exceptions_users.UserUnauthorizedAPIException().get_full_details()
+                },
+            ),
+            404: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description="",
+                schema=serializers_base.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": [
+                        exceptions_users.UserDoesNotExistsAPIException().get_full_details(),
+                        exceptions.SubjectsDoesNotExistsAPIException().get_full_details(),
+                    ]
+                },
+            ),
+        },
+    )
+    def get(self, request, id, format=None):
+        teacher = self.get_objects(id)
+        serializer = serializers.SubjectSerializer(teacher)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_description="Endpoint para editar el registro una Asignatura",
+        responses={
+            200: serializers.SubjectSerializer(many=True),
+            401: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=constanst_users.NOT_AUTORIZATION,
+                schema=serializers_base.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": exceptions_users.UserUnauthorizedAPIException().get_full_details()
+                },
+            ),
+            404: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=constanst.NOT_EXIST_REGISTED_TEACHER,
+                schema=serializers_base.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": [
+                        exceptions.SubjectsDoesNotExistsAPIException().get_full_details()
+                    ]
+                },
+            ),
+        },
+    )
+    def put(self, request, id, format=None):
+        subject = self.get_objects(id)
+        serializer = serializers.SubjectSerializer(
+            subject,
+            data=request.data,
+            partial=True
+        )
+        if serializer.is_valid():
+            subject_update = serializer.save()
+            detail = serializers.SubjectSerializer(subject_update, many=False)
+            return Response(detail.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        operation_description="Endpoint para desactivar una asignatura",
+        request_body=serializers_base.ExceptionSerializer(many=False),
+        responses={
+            200: serializers.SubjectSerializer(many=True),
+            401: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=constanst_users.NOT_AUTORIZATION,
+                schema=serializers_base.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": exceptions_users.UserUnauthorizedAPIException().get_full_details()
+                },
+            ),
+            404: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=constanst.NOT_EXIST_REGISTED_SUBJECTS,
+                schema=serializers_base.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": [
+                        exceptions.SubjectsDoesNotExistsAPIException().get_full_details()
+                    ]
+                },
+            ),
+        },
+    )
+    def delete(self, request, id, format=None):
+        subject = self.get_objects(id)
+        subject.status = models_base.BaseModel.Status.INACTIVE
+        subject.save()
+        return Response({"id": subject.id, "status": subject.status.name})

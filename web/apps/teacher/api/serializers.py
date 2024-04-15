@@ -128,3 +128,14 @@ class TeacherCreateActionSerializer(serializers.Serializer):
             teacher.save()
 
             return teacher
+
+
+class SubjectSerializer(serializers.ModelSerializer):
+    teacher = serializers.PrimaryKeyRelatedField(
+        queryset=models.Teacher.objects.all(),
+        write_only=True  # Esto asegura que el campo no se incluya al serializar
+    )
+
+    class Meta:
+        model = models.Subject
+        fields = ("teacher", "name", "description", "credis", "hours")
