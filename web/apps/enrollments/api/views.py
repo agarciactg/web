@@ -162,3 +162,41 @@ class AcademicGroupsActionsAPIView(APIWithCustomerPermissionsMixin, APIView):
         academic_group.status = models_base.BaseModel.Status.INACTIVE
         academic_group.save()
         return Response({"id": academic_group.id, "status": academic_group.status.name})
+
+
+class EnrollmentCreateAPIView(APIWithCustomerPermissionsMixin, generics.ListAPIView):
+    pagination_class = StandardResultsPagination
+    serializer_class = serializers.EnrollmentCreateSerializer
+
+    @swagger_auto_schema(
+        operation_description="Endpoint para crear una matricula.",
+        request_body=serializers_base.ExceptionSerializer(many=False),
+        responses={
+            200: serializers.EnrollmentCreateSerializer(many=False),
+            401: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=constanst_users.NOT_AUTORIZATION,
+                schema=serializers_base.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": exceptions_users.UserUnauthorizedAPIException().get_full_details()
+                },
+            ),
+            404: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=constanst_users.NOT_EXIST_REGISTED_USER,
+                schema=serializers_base.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": exceptions_users.UserDoesNotExistsAPIException().get_full_details()
+                },
+            ),
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = serializers.EnrollmentCreateSerializer(
+            data=request.data, context={"is_create": True}
+        )
+        serializer.is_valid(raise_exception=True)
+        enrollment = serializer.save()
+        detail = serializers.EnrollmentCreateSerializer(enrollment, many=False)
+        return Response(detail.data)
+

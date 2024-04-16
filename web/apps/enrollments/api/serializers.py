@@ -42,3 +42,50 @@ class AcademicGroupsDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.AcademicGroups
         fields = ("teachers", "degress", "name", "code")
+
+
+class EnrollmentCreateSerializer(serializers.ModelSerializer):
+    subjects = serializers.PrimaryKeyRelatedField(
+        write_only=True,
+        queryset=models_teacher.Subject.objects.all(),  # Ajusta el queryset según tu modelo de Subject
+        many=True,
+        required=False,
+        allow_null=True,
+    )
+
+    class Meta:
+        model = models.Enrollment
+        fields = (
+            "academic_groups",
+            "subjects",
+            "student",
+            "date_created"
+        )
+
+    def create(self, validated_data):
+        with atomic():
+            subjects = validated_data.pop("subjects", None)
+            enrollment = models.Enrollment.objects.create(**validated_data)  # Crea un objeto Enrollment
+            if subjects:
+                for subject in subjects:
+                    enrollment.subjects.add(subject)
+            enrollment.save()
+            return enrollment
+
+
+class EnrollmentDetailSerializer(serializers.ModelSerializer):
+    subjects = serializers.PrimaryKeyRelatedField(
+        queryset=models.Enrollment.objects.all(),
+        many=True,
+        required=False,
+        allow_null=True
+    )
+
+    class Meta:
+        model = models.Enrollment
+        fields = (
+            "academic_groups",
+            "subjects",
+            "student",
+            "date_created"
+        )
