@@ -14,7 +14,6 @@ class AcademicGroupsSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
-    # degrees = serializers.IntegerField(source="get_degrees_display")   # Corregido el nombre del campo "degrees"
 
     class Meta:
         model = models.AcademicGroups
@@ -22,5 +21,24 @@ class AcademicGroupsSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         with atomic():
+            teachers = validated_data.pop("teachers", None)
             academic_group = models.AcademicGroups.objects.create(**validated_data)
+            if teachers:
+                for teacher in teachers:
+                    academic_group.teachers.add(teacher)
+            academic_group.save()
             return academic_group
+
+
+class AcademicGroupsDetailSerializer(serializers.ModelSerializer):
+    teachers = serializers.PrimaryKeyRelatedField(
+        queryset=models_teacher.Teacher.objects.all(),
+        many=True,
+        required=False,
+        allow_null=True,
+    )
+    # degrees = serializers.IntegerField(source="get_degrees_display")   # Corregido el nombre del campo "degrees"
+
+    class Meta:
+        model = models.AcademicGroups
+        fields = ("teachers", "degress", "name", "code")

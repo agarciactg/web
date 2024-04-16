@@ -9,7 +9,7 @@ class Teacher(BaseModel):
     user = models.OneToOneField(
         models_user.User, on_delete=models.PROTECT, verbose_name="usuario", related_name="teacher"
     )
-    profession = models.CharField("Profecion", max_length=340, db_index=True)
+    profession = models.CharField("Profecion", max_length=340, null=True, blank=True)
     is_full_time = models.BooleanField("Es tiempo completo", default=False)
 
     def __str__(self):

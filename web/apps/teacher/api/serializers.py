@@ -5,15 +5,11 @@ from web.apps.base import models as models_base
 from web.apps.teacher import models
 from web.apps.teacher import exceptions
 from web.apps.users import models as models_users
+from web.apps.users.api import serializers as serializers_user
 
 
 class TeacherDetailSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(
-        write_only=True,
-        many=False,
-        required=True,
-        queryset=models_users.User.objects.all(),
-    )
+    user = serializers_user.UserDetailSummarySerializer(many=False)
 
     class Meta:
         model = models.Teacher
