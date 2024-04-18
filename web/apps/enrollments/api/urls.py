@@ -19,4 +19,9 @@ urlpatterns = [
         views.EnrollmentCreateAPIView.as_view(),
         name="enrollment_group_create",
     ),
+    path(
+        "api/v1/enrollment/actions/<int:id>/",
+        views.EnrollmentsActionsAPIView.as_view(),
+        name="enrollment_group_actions",
+    ),
 ]

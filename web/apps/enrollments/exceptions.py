@@ -16,3 +16,15 @@ class AcademicGroupsAlreadyExistsException(BaseAPIException):
     status_code = 400
     default_detail = "Ya existe un Grupo academico con los datos ingresados"
     default_code = "ACADEMIC_GROUPS_ALREADY_EXIST"
+
+
+class EnrollmentsDoesNotExistsAPIException(BaseAPIException):
+    status_code = 404
+    default_detail = "No Existe registro de la matricula"
+    default_code = "ENROLLMENTS_DOES_NOT_EXIST"
+
+
+class EnrollmentsAlreadyExistsException(BaseAPIException):
+    status_code = 400
+    default_detail = "Ya existe una matricula con los datos ingresados"
+    default_code = "ENROLLMENTS_ALREADY_EXIST"

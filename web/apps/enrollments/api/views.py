@@ -200,3 +200,115 @@ class EnrollmentCreateAPIView(APIWithCustomerPermissionsMixin, generics.ListAPIV
         detail = serializers.EnrollmentCreateSerializer(enrollment, many=False)
         return Response(detail.data)
 
+
+class EnrollmentsActionsAPIView(APIWithCustomerPermissionsMixin, APIView):
+    """
+    Endpoint to get, update and delete an Enrollments
+    """
+
+    pagination_class = StandardResultsPagination
+    serializer_class = serializers.AcademicGroupsSerializer
+
+    def get_objects(self, id):
+        try:
+            return models.Enrollment.objects.get(id=id)
+        except models.Enrollment.DoesNotExist:
+            raise exceptions.EnrollmentsDoesNotExistsAPIException()
+
+    @swagger_auto_schema(
+        operation_description="Endpoint para obtener el detalle de un enrollments por su id",
+        responses={
+            200: serializers.EnrollmentCreateSerializer(many=True),
+            401: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=constanst_users.NOT_AUTORIZATION,
+                schema=serializers_base.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": exceptions_users.UserUnauthorizedAPIException().get_full_details()
+                },
+            ),
+            404: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description="",
+                schema=serializers_base.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": [
+                        exceptions_users.UserDoesNotExistsAPIException().get_full_details(),
+                        exceptions.EnrollmentsAlreadyExistsException().get_full_details(),
+                    ]
+                },
+            ),
+        },
+    )
+    def get(self, request, id, format=None):
+        enrollment = self.get_objects(id)
+        serializer = serializers.EnrollmentDetailSerializer(enrollment)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_description="Endpoint para editar el registro de un matricula",
+        responses={
+            200: serializers.EnrollmentDetailSerializer(many=True),
+            401: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=constanst_users.NOT_AUTORIZATION,
+                schema=serializers_base.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": exceptions_users.UserUnauthorizedAPIException().get_full_details()
+                },
+            ),
+            404: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=constanst.NOT_EXIST_REGISTED_ACADEMIC_GROUPS,
+                schema=serializers_base.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": [
+                        exceptions.EnrollmentsDoesNotExistsAPIException().get_full_details()
+                    ]
+                },
+            ),
+        },
+    )
+    def put(self, request, id, format=None):
+        enrollment = self.get_objects(id)
+        serializer = serializers.EnrollmentCreateSerializer(
+            enrollment,
+            data=request.data,
+            partial=True,
+        )
+        if serializer.is_valid():
+            enrollment_update = serializer.save()
+            detail = serializers.EnrollmentDetailSerializer(enrollment_update, many=False)
+            return Response(detail.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        operation_description="Endpoint para desactivar una matricula",
+        request_body=serializers_base.ExceptionSerializer(many=False),
+        responses={
+            200: serializers.EnrollmentDetailSerializer(many=True),
+            401: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=constanst_users.NOT_AUTORIZATION,
+                schema=serializers_base.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": exceptions_users.UserUnauthorizedAPIException().get_full_details()
+                },
+            ),
+            404: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=constanst.NOT_EXIST_REGISTED_ENROLLMENTS,
+                schema=serializers_base.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": [
+                        exceptions.EnrollmentsDoesNotExistsAPIException().get_full_details()
+                    ]
+                },
+            ),
+        },
+    )
+    def delete(self, request, id, format=None):
+        enrollments = self.get_objects(id)
+        enrollments.status = models_base.BaseModel.Status.INACTIVE
+        enrollments.save()
+        return Response({"id": enrollments.id, "status": enrollments.status.name})
