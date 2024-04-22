@@ -16,6 +16,7 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.template.loader import render_to_string
 
 from web.apps.base.api import serializers as base_serializer
+from web.apps.base.utils import StandardResultsPagination
 from web.apps.users.api import serializers
 from web.apps.users import models
 from web.apps.users import exceptions as user_exceptions
@@ -224,6 +225,9 @@ class UserActionsAPIView(mixins.APIWithCustomerPermissionsMixin, APIView):
 
 
 class ChangePasswordView(mixins.APIBasePermissionsMixin, generics.UpdateAPIView):
+    """
+    View to change password of a user
+    """
     queryset = models.User.objects.all()
     permission_class = (IsAuthenticated,)
     serializer_class = serializers.ChangePasswordSerializer
@@ -233,6 +237,9 @@ class ChangePasswordView(mixins.APIBasePermissionsMixin, generics.UpdateAPIView)
 
 
 class PasswordResetRequestView(mixins.APIWithCustomerPermissionsMixin, APIView):
+    """
+    Reset password reset request with email.
+    """
     @swagger_auto_schema(
         operation_description="Endpoint para restablecer contraseña via email.",
         request_body=base_serializer.ExceptionSerializer(many=False),
@@ -353,3 +360,44 @@ class UserDetailAPIView(mixins.APIBasePermissionsMixin, generics.RetrieveAPIView
 
         serializer = serializers.UserDetailSerializer(self.request.user)
         return Response(data=serializer.data)
+
+
+class UserCreateAPIView(mixins.APIWithCustomerPermissionsMixin, generics.ListAPIView):
+    """
+    Return: Create User
+    """
+
+    serializer_class = serializers.UserCreateSerializer
+    pagination_class = StandardResultsPagination
+
+    @swagger_auto_schema(
+        operation_description="Endpoint para crear un Usuario.",
+        request_body=base_serializer.ExceptionSerializer(many=False),
+        responses={
+            200: serializers.UserCreateSerializer(many=False),
+            401: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=user_constants.NOT_AUTORIZATION,
+                schema=base_serializer.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": user_exceptions.UserUnauthorizedAPIException().get_full_details()
+                },
+            ),
+            404: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description=user_constants.NOT_EXIST_REGISTED_USER,
+                schema=base_serializer.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": user_exceptions.UserDoesNotExistsAPIException().get_full_details()
+                },
+            ),
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = serializers.UserCreateSerializer(
+            data=request.data, context={"is_create": True}
+        )
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        detail = serializers.UserDetailSerializer(user, many=False)
+        return Response(detail.data)

@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+from django.db.transaction import atomic
+
 from web.apps.users import models
 
 
@@ -94,3 +96,34 @@ class PasswordResetSerializer(serializers.Serializer):
 class SetPasswordSerializer(serializers.Serializer):
     password = serializers.CharField()
     confirm_password = serializers.CharField()
+
+
+class UserCreateSerializer(serializers.ModelSerializer):
+    """
+    Return: Serializer for created User
+    """
+
+    type_user = serializers.ChoiceField(choices=models.User.UserType.choices)
+    type_document = serializers.ChoiceField(choices=models.User.TypeDocument.choices)
+
+    class Meta:
+        model = models.User
+        fields = (
+            "username",
+            "type_user",
+            "first_name",
+            "last_name",
+            "type_document",
+            "document_number",
+            "avatar",
+            "avatar_url",
+        )
+
+    def create(self, validated_data):
+        with atomic():
+            type_user = validated_data.pop("type_user", None)
+            type_document = validated_data.pop("type_document", None)
+            user = models.User.objects.create(
+                type_user=type_user, type_document=type_document, **validated_data
+            )
+            return user

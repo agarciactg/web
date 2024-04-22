@@ -87,9 +87,9 @@ class User(AbstractUser):
     )
     document_number = models.IntegerField(
         verbose_name="Numero de Documento",
-        validators=[MinLengthValidator(5), MaxLengthValidator(12)],
         null=True,
         blank=True,
+        unique=True,
     )
     avatar = ProcessedImageField(
         verbose_name="Foto de Perfil",

@@ -21,4 +21,5 @@ urlpatterns = [
     ),
     path("api/v1/users/detail/", views.UserDetailAPIView.as_view(), name="user_detail"),
     path("api/v1/users/actions/<int:pk>/", views.UserActionsAPIView.as_view(), name="user_actions"),
+    path("api/v1/users/create/", views.UserCreateAPIView.as_view(), name="user_create"),
 ]
