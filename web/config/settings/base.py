@@ -1,7 +1,6 @@
 import os
 from datetime import timedelta
 from pathlib import Path
-from corsheaders.defaults import default_headers
 
 
 import environ
@@ -21,19 +20,9 @@ if READ_DOT_ENV_FILE:
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 # DEBUG = env.bool("DEBUG", False)
-# DEBUG = 'RENDER' not in os.environ
-DEBUG = env.bool("DEBUG", False)
+DEBUG = 'RENDER' not in os.environ
 
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = True
-
-# cors headers
-CORS_ALLOWED_HEADERS = list(default_headers) + [
-    "X-Api-Key",
-]
-
-ALLOWED_HOSTS = ["localhost", "*"]
+ALLOWED_HOSTS = []
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 
@@ -78,8 +67,6 @@ LOCAL_APPS = [
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
-    "corsheaders.middleware.CorsPostCsrfMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

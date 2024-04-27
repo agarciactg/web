@@ -4,6 +4,7 @@ import sentry_sdk
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
+from corsheaders.defaults import default_headers
 
 from web.config.settings.base import *  # noqa
 
@@ -12,6 +13,18 @@ DEBUG = False
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "X-Api-Key",
+]
 
 ALLOWED_HOSTS = ["*"]
 
