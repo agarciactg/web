@@ -18,7 +18,7 @@ from django.template.loader import render_to_string
 from web.apps.base.api import serializers as base_serializer
 from web.apps.base.utils import StandardResultsPagination
 from web.apps.users.api import serializers
-from web.apps.users import models
+from web.apps.users import exceptions, models
 from web.apps.users import exceptions as user_exceptions
 from web.apps.users import constanst as user_constants
 from web.config.settings.base import BASE_DIR
@@ -237,6 +237,13 @@ class ChangePasswordView(mixins.APIBasePermissionsMixin, generics.UpdateAPIView)
 
 
 class PasswordResetRequestView(mixins.APIWithCustomerPermissionsMixin, APIView):
+
+    def get_objects(self, email_get):
+        try:
+            return models.User.objects.get(email=email_get)
+        except models.User.DoesNotExist:
+            raise exceptions.UserDoesNotExistsAPIException()
+
     """
     Reset password reset request with email.
     """
@@ -268,36 +275,29 @@ class PasswordResetRequestView(mixins.APIWithCustomerPermissionsMixin, APIView):
         serializer.is_valid(raise_exception=True)
 
         email = serializer.validated_data["email"]
-        user = models.User.objects.filter(email=email).first()
+        user = self.get_objects(email_get=email)
 
-        if user:
-            token_generator = PasswordResetTokenGenerator()
-            uidb64 = user.uuid
-            token = token_generator.make_token(user)
+        token_generator = PasswordResetTokenGenerator()
+        uidb64 = user.uuid
+        token = token_generator.make_token(user)
 
-            reset_url = f"{request.build_absolute_uri()}confirm/{uidb64}/{token}/"
+        reset_url = f"{request.build_absolute_uri()}confirm/{uidb64}/{token}/"
 
-            # template message
-            email_body = render_to_string(
-                os.path.join(BASE_DIR, "templates") + "/reset_password.html",
-                {"user": user, "reset_url": reset_url},
-            )
+        # template message
+        email_body = render_to_string(
+            os.path.join(BASE_DIR, "templates") + "/reset_password.html",
+            {"user": user, "reset_url": reset_url},
+        )
 
-            mail = EmailMessage(
-                "Restablecimiento de Contraseña", email_body, "agarciacompanyctg@gmail.com", [email]
-            )
-            mail.content_subtype = "html"
-            mail.send()
-            return Response(
-                {"detail": "Enlace de restablecimiento enviado correctamente."},
-                status=status.HTTP_200_OK,
-            )
-
-        else:
-            return Response(
-                {"error": "No existe un usuario con este correo electrónico."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        mail = EmailMessage(
+            "Restablecimiento de Contraseña", email_body, "agarciacompanyctg@gmail.com", [email]
+        )
+        mail.content_subtype = "html"
+        mail.send()
+        return Response(
+            {"detail": "Enlace de restablecimiento enviado correctamente."},
+            status=status.HTTP_200_OK,
+        )
 
 
 class passwordResetConfirmView(mixins.APIWithCustomerPermissionsMixin, APIView):
