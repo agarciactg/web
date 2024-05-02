@@ -1,5 +1,11 @@
 import os
+
 from django.core.mail import EmailMessage
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.template.loader import render_to_string
+from django.utils.crypto import get_random_string
+from django.core.cache import cache
+
 from drf_yasg2 import openapi
 from drf_yasg2.utils import swagger_auto_schema
 
@@ -12,8 +18,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.template.loader import render_to_string
 
 from web.apps.base.api import serializers as base_serializer
 from web.apps.base.utils import StandardResultsPagination
@@ -237,6 +241,9 @@ class ChangePasswordView(mixins.APIBasePermissionsMixin, generics.UpdateAPIView)
 
 
 class PasswordResetRequestView(mixins.APIWithCustomerPermissionsMixin, APIView):
+    """
+    Reset password reset request with email.
+    """
 
     def get_objects(self, email_get):
         try:
@@ -244,9 +251,6 @@ class PasswordResetRequestView(mixins.APIWithCustomerPermissionsMixin, APIView):
         except models.User.DoesNotExist:
             raise exceptions.UserDoesNotExistsAPIException()
 
-    """
-    Reset password reset request with email.
-    """
     @swagger_auto_schema(
         operation_description="Endpoint para restablecer contraseña via email.",
         request_body=base_serializer.ExceptionSerializer(many=False),
@@ -277,16 +281,15 @@ class PasswordResetRequestView(mixins.APIWithCustomerPermissionsMixin, APIView):
         email = serializer.validated_data["email"]
         user = self.get_objects(email_get=email)
 
-        token_generator = PasswordResetTokenGenerator()
-        uidb64 = user.uuid
-        token = token_generator.make_token(user)
+        reset_code = get_random_string(length=6, allowed_chars='1234567890')
 
-        reset_url = f"{request.build_absolute_uri()}confirm/{uidb64}/{token}/"
+        # save code in cache
+        cache.set(f'reset_code_{email}', reset_code, timeout=800)
 
         # template message
         email_body = render_to_string(
             os.path.join(BASE_DIR, "templates") + "/reset_password.html",
-            {"user": user, "reset_url": reset_url},
+            {"user": user, "reset_url": reset_code},
         )
 
         mail = EmailMessage(
