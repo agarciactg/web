@@ -15,7 +15,7 @@ urlpatterns = [
     ),
     path("api/v1/reset-password/", views.PasswordResetRequestView.as_view(), name="reset_password"),
     path(
-        "api/v1/reset-password/confirm/<str:uidb64>/<str:token>/",
+        "api/v1/reset-password/confirm/",
         views.passwordResetConfirmView.as_view(),
         name="reset_password_confirm",
     ),

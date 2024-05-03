@@ -94,8 +94,9 @@ class PasswordResetSerializer(serializers.Serializer):
 
 
 class SetPasswordSerializer(serializers.Serializer):
-    password = serializers.CharField()
-    confirm_password = serializers.CharField()
+    email = serializers.EmailField()
+    reset_code = serializers.CharField(max_length=6)
+    password = serializers.CharField(write_only=True)
 
 
 class UserCreateSerializer(serializers.ModelSerializer):

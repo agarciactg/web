@@ -232,6 +232,7 @@ class ChangePasswordView(mixins.APIBasePermissionsMixin, generics.UpdateAPIView)
     """
     View to change password of a user
     """
+
     queryset = models.User.objects.all()
     permission_class = (IsAuthenticated,)
     serializer_class = serializers.ChangePasswordSerializer
@@ -281,15 +282,15 @@ class PasswordResetRequestView(mixins.APIWithCustomerPermissionsMixin, APIView):
         email = serializer.validated_data["email"]
         user = self.get_objects(email_get=email)
 
-        reset_code = get_random_string(length=6, allowed_chars='1234567890')
+        reset_code = get_random_string(length=6, allowed_chars="1234567890")
 
         # save code in cache
-        cache.set(f'reset_code_{email}', reset_code, timeout=800)
+        cache.set(f"reset_code_{email}", reset_code, timeout=800)
 
         # template message
         email_body = render_to_string(
             os.path.join(BASE_DIR, "templates") + "/reset_password.html",
-            {"user": user, "reset_url": reset_code},
+            {"user": user, "code": reset_code},
         )
 
         mail = EmailMessage(
@@ -304,6 +305,10 @@ class PasswordResetRequestView(mixins.APIWithCustomerPermissionsMixin, APIView):
 
 
 class passwordResetConfirmView(mixins.APIWithCustomerPermissionsMixin, APIView):
+    """
+    Confirmar codigo para restablecer password
+    """
+
     @swagger_auto_schema(
         operation_description="Endpoint para cambiar la contrase segun el acceso del email.",
         request_body=base_serializer.ExceptionSerializer(many=False),
@@ -327,23 +332,33 @@ class passwordResetConfirmView(mixins.APIWithCustomerPermissionsMixin, APIView):
             ),
         },
     )
-    def post(self, request, uidb64, token):
-        user = models.User.objects.filter(uuid=uidb64).first()
+    def post(self, request, *args, **kwargs):
 
-        if user and PasswordResetTokenGenerator().check_token(user, token):
-            serializer = serializers.SetPasswordSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
+        serializer = serializers.SetPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
+        reset_code = serializer.validated_data["reset_code"]
+        email = serializer.validated_data["email"]
+
+        # Recuperar el codigo de la cache
+        cached_code = cache.get(f"reset_code_{email}")
+
+        if cached_code == reset_code:
+            user = models.User.objects.get(email=email)
             new_password = serializer.validated_data["password"]
             user.set_password(new_password)
             user.save()
+
+            # Borrar el codigo de la cache despues de usuario
+            cache.delete(f"reset_code_{email}")
+
             return Response(
                 {"detail": "Contraseña restablecida correctamente."}, status=status.HTTP_200_OK
             )
 
         else:
             return Response(
-                {"error": "Enlace de restablecimiento no válido."},
+                {"error": "Código de restablecimiento no válido o expirado."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
