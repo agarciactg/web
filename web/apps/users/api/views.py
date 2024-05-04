@@ -358,8 +358,8 @@ class passwordResetConfirmView(mixins.APIWithCustomerPermissionsMixin, APIView):
 
         else:
             return Response(
-                {"error": "Código de restablecimiento no válido o expirado."},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"code_transaction": "ERROR", "data": {"error": "Código de restablecimiento no válido o expirado."}},
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 
