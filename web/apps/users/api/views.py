@@ -1,7 +1,6 @@
 import os
 
 from django.core.mail import EmailMessage
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.template.loader import render_to_string
 from django.utils.crypto import get_random_string
 from django.core.cache import cache
@@ -378,6 +377,22 @@ class UserDetailAPIView(mixins.APIBasePermissionsMixin, generics.RetrieveAPIView
 
         serializer = serializers.UserDetailSerializer(self.request.user)
         return Response(data=serializer.data)
+
+
+class UsersListAPIView(mixins.APIWithUserPermissionsMixin, generics.ListAPIView):
+    serializer_class = serializers.UserDetailSerializer
+    queryset = models.User.objects.all()
+    pagination_class = StandardResultsPagination
+
+    def get_queryset(self):
+        if not self.request.user:
+            raise user_exceptions.UserDoesNotExistsAPIException()
+
+        if self.request.user.type_user == models.User.UserType.ADMIN:
+            return models.User.objects.all()
+
+        else:
+            return models.User.objects.none()
 
 
 class UserCreateAPIView(mixins.APIWithCustomerPermissionsMixin, generics.ListAPIView):

@@ -11,4 +11,4 @@ class APIWithUserPermissionsMixin:
 
 
 class APIWithCustomerPermissionsMixin:
-    permission_classes = [IsAuthenticated | HasAPIKey] 
+    permission_classes = [IsAuthenticated | HasAPIKey]
