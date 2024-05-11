@@ -25,6 +25,7 @@ class SerializerTokenAuth(serializers.Serializer):
 
 class UserDetailSerializer(serializers.ModelSerializer):
     type_user = serializers.CharField(source="get_type_user_display")
+    type_document = serializers.SerializerMethodField()
 
     class Meta:
         model = models.User
@@ -41,6 +42,9 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "avatar_url",
             "is_active",
         )
+
+    def get_type_document(self, obj):
+        return obj.get_type_document_display()
 
 
 class UserDetailSummarySerializer(serializers.ModelSerializer):

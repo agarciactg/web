@@ -4,7 +4,6 @@ import uuid
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as DjangoUserManager
 from django.db import models
-from django.core.validators import MinLengthValidator, MaxLengthValidator
 
 from web.apps.users.files import user_avatar_image_path
 from imagekit.processors import ResizeToFill
