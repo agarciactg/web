@@ -215,16 +215,14 @@ class UserActionsAPIView(mixins.APIWithCustomerPermissionsMixin, APIView):
     )
     def delete(self, request, pk, format=None):
         user = self.get_objects(pk)
-        if self.request.user.type_user == models.User.UserType.ADMIN:
+        if user.is_active:
             user.is_active = False
-            user.save()
-            detail = serializers.UserDetailSerializer(user, many=False)
-            return Response(detail.data)
+        else:
+            user.is_active = True
 
-        return Response(
-            {"message": "Solo el administrador puede eliminar un usuario"},
-            status=status.HTTP_403_FORBIDDEN,
-        )
+        user.save()
+        detail = serializers.UserDetailSerializer(user, many=False)
+        return Response(detail.data)
 
 
 class ChangePasswordView(mixins.APIBasePermissionsMixin, generics.UpdateAPIView):
@@ -357,8 +355,11 @@ class passwordResetConfirmView(mixins.APIWithCustomerPermissionsMixin, APIView):
 
         else:
             return Response(
-                {"code_transaction": "ERROR", "data": {"error": "Código de restablecimiento no válido o expirado."}},
-                status=status.HTTP_400_BAD_REQUEST
+                {
+                    "code_transaction": "ERROR",
+                    "data": {"error": "Código de restablecimiento no válido o expirado."},
+                },
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
 
@@ -389,7 +390,7 @@ class UsersListAPIView(mixins.APIWithUserPermissionsMixin, generics.ListAPIView)
             raise user_exceptions.UserDoesNotExistsAPIException()
 
         if self.request.user.type_user == models.User.UserType.ADMIN:
-            return models.User.objects.all().order_by('id')
+            return models.User.objects.all().order_by("id")
 
         else:
             return models.User.objects.none()
