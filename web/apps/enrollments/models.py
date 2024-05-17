@@ -39,8 +39,8 @@ class AcademicGroups(BaseModel):
         return f"{self.name} - {self.code}"
 
     class Meta:
-        verbose_name = "Grado Academico"
-        verbose_name_plural = "Grados Academicos"
+        verbose_name = "Grupos Academico"
+        verbose_name_plural = "Grupos Academicos"
 
 
 class Enrollment(BaseModel):

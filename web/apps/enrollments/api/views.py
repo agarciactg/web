@@ -8,6 +8,8 @@ from web.apps.enrollments.api import serializers
 from web.apps.enrollments import models, exceptions, constanst
 from web.apps.base.api import serializers as serializers_base
 from web.apps.users import constanst as constanst_users, exceptions as exceptions_users
+from web.apps.users import models as models_users
+from web.utils import mixins
 from web.utils.mixins import APIWithCustomerPermissionsMixin
 
 from drf_yasg2.utils import swagger_auto_schema
@@ -312,3 +314,22 @@ class EnrollmentsActionsAPIView(APIWithCustomerPermissionsMixin, APIView):
         enrollments.status = models_base.BaseModel.Status.INACTIVE
         enrollments.save()
         return Response({"id": enrollments.id, "status": enrollments.status.name})
+
+
+class EnrollmentAPIView(mixins.APIWithUserPermissionsMixin, generics.ListAPIView):
+    serializer_class = serializers.EnrollmentDetailSerializer
+    queryset = models.Enrollment.objects.all()
+    pagination_class = StandardResultsPagination
+
+    def get_queryset(self):
+        if not self.request.user:
+            raise exceptions_users.UserDoesNotExistsAPIException()
+
+        if self.request.user.type_user in [
+            models_users.User.UserType.ADMIN,
+            models_users.User.UserType.TEACHER,
+        ]:
+            return models.Enrollment.objects.all().order_by("id")
+
+        else:
+            return models.Enrollment.objects.none()
