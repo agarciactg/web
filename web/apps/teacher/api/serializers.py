@@ -134,4 +134,4 @@ class SubjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Subject
-        fields = ("teacher", "name", "description", "credis", "hours")
+        fields = ("id", "teacher", "name", "description", "credis", "hours")

@@ -4,6 +4,8 @@ from django.db.transaction import atomic
 
 from web.apps.enrollments import models
 from web.apps.teacher import models as models_teacher
+from web.apps.teacher.api import serializers as serializers_teacher
+from web.apps.users.api.serializers import UserDetailSummarySerializer
 
 
 class AcademicGroupsSerializer(serializers.ModelSerializer):
@@ -41,7 +43,7 @@ class AcademicGroupsDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.AcademicGroups
-        fields = ("teachers", "degress", "name", "code")
+        fields = ("id", "teachers", "degress", "name", "code")
 
 
 class EnrollmentCreateSerializer(serializers.ModelSerializer):
@@ -74,18 +76,17 @@ class EnrollmentCreateSerializer(serializers.ModelSerializer):
 
 
 class EnrollmentDetailSerializer(serializers.ModelSerializer):
-    subjects = serializers.PrimaryKeyRelatedField(
-        queryset=models.Enrollment.objects.all(),
-        many=True,
-        required=False,
-        allow_null=True
-    )
+    subjects = serializers_teacher.SubjectSerializer(many=True, required=False, allow_null=True)
+    academic_groups = AcademicGroupsDetailSerializer()
+    student = UserDetailSummarySerializer()
 
     class Meta:
         model = models.Enrollment
         fields = (
+            "id",
             "academic_groups",
             "subjects",
             "student",
             "date_created"
         )
+
