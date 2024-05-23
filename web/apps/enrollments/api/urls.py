@@ -15,6 +15,11 @@ urlpatterns = [
         name="academic_group_update",
     ),
     path(
+        "api/v1/academic_groups/list/",
+        views.AcademicGroupsAPIView.as_view(),
+        name="academic_groups_list",
+    ),
+    path(
         "api/v1/enrollment/create/",
         views.EnrollmentCreateAPIView.as_view(),
         name="enrollment_group_create",

@@ -11,6 +11,7 @@ class EnrollmentsAdmin(ModelAdmin):
         "id",
         "student",
         "date_created",
+        "status"
     )
     search_fields = (
         "student__username",
@@ -21,7 +22,7 @@ class EnrollmentsAdmin(ModelAdmin):
     list_per_page = settings.NUMBER_PAGINATION_ADMIN
     icon_name = "collections_bookmark"
 
-    fields = ["academic_groups", "subjects", "student"]
+    fields = ["academic_groups", "subjects", "student", "status"]
 
     # Default: return only user type student in enrollment
     def formfield_for_foreignkey(self, db_field, request, **kwargs):

@@ -33,17 +33,16 @@ class AcademicGroupsSerializer(serializers.ModelSerializer):
 
 
 class AcademicGroupsDetailSerializer(serializers.ModelSerializer):
-    teachers = serializers.PrimaryKeyRelatedField(
-        queryset=models_teacher.Teacher.objects.all(),
-        many=True,
-        required=False,
-        allow_null=True,
-    )
-    # degrees = serializers.IntegerField(source="get_degrees_display")   # Corregido el nombre del campo "degrees"
+    teachers = serializers_teacher.TeacherDetailSerializer(many=True, required=False, allow_null=True)
+    degress_display = serializers.SerializerMethodField()
 
     class Meta:
         model = models.AcademicGroups
-        fields = ("id", "teachers", "degress", "name", "code")
+        fields = ("id", "teachers", "degress_display", "name", "code")
+
+    def get_degress_display(self, obj):
+        # Aquí obj es una instancia del modelo AcademicGroups
+        return obj.get_degress_display()
 
 
 class EnrollmentCreateSerializer(serializers.ModelSerializer):
@@ -89,4 +88,3 @@ class EnrollmentDetailSerializer(serializers.ModelSerializer):
             "student",
             "date_created"
         )
-

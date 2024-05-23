@@ -166,6 +166,25 @@ class AcademicGroupsActionsAPIView(APIWithCustomerPermissionsMixin, APIView):
         return Response({"id": academic_group.id, "status": academic_group.status.name})
 
 
+class AcademicGroupsAPIView(mixins.APIWithUserPermissionsMixin, generics.ListAPIView):
+    serializer_class = serializers.AcademicGroupsDetailSerializer
+    queryset = models.AcademicGroups.objects.all()
+    pagination_class = StandardResultsPagination
+
+    def get_queryset(self):
+        if not self.request.user:
+            raise exceptions_users.UserDoesNotExistsAPIException()
+
+        if self.request.user.type_user in [
+            models_users.User.UserType.ADMIN,
+            models_users.User.UserType.TEACHER,
+        ]:
+            return models.AcademicGroups.objects.filter(status=models_base.BaseModel.Status.ACTIVE).order_by("id")
+
+        else:
+            return models.AcademicGroups.objects.none()
+
+
 class EnrollmentCreateAPIView(APIWithCustomerPermissionsMixin, generics.ListAPIView):
     pagination_class = StandardResultsPagination
     serializer_class = serializers.EnrollmentCreateSerializer
@@ -329,7 +348,7 @@ class EnrollmentAPIView(mixins.APIWithUserPermissionsMixin, generics.ListAPIView
             models_users.User.UserType.ADMIN,
             models_users.User.UserType.TEACHER,
         ]:
-            return models.Enrollment.objects.all().order_by("id")
+            return models.Enrollment.objects.filter(status=models_base.BaseModel.Status.ACTIVE).order_by("id")
 
         else:
             return models.Enrollment.objects.none()

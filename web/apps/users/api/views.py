@@ -390,7 +390,7 @@ class UsersListAPIView(mixins.APIWithUserPermissionsMixin, generics.ListAPIView)
             raise user_exceptions.UserDoesNotExistsAPIException()
 
         if self.request.user.type_user == models.User.UserType.ADMIN:
-            return models.User.objects.all().order_by("id")
+            return models.User.objects.filter(is_active=True).order_by("id")
 
         else:
             return models.User.objects.none()

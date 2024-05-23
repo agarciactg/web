@@ -38,6 +38,10 @@ class AcademicGroups(BaseModel):
     def __str__(self):
         return f"{self.name} - {self.code}"
 
+    def get_degress_display(self):
+        """Devuelve la representación en string del grado basado en el campo degress."""
+        return self.Degress(self.degress).label
+
     class Meta:
         verbose_name = "Grupos Academico"
         verbose_name_plural = "Grupos Academicos"
