@@ -10,4 +10,5 @@ urlpatterns = [
     path("api/v1/teacher/actions/<int:id>/", views.TeacherActionsAPIView.as_view(), name="teacher_actions"),
     path("api/v1/subject/create/", views.SubjectsCreateAPIView.as_view(), name="subjects_create"),
     path("api/v1/subject/actions/<int:id>/", views.SubjectActionsAPIView.as_view(), name="subjects_actions"),
+    path("api/v1/subject/list/", views.SubjectsAPIView.as_view(), name="subjects_list"),
 ]

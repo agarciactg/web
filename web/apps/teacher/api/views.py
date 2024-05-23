@@ -7,7 +7,9 @@ from web.apps.base.api import serializers as serializers_base
 from web.apps.base import models as models_base
 from web.apps.base.utils import StandardResultsPagination
 from web.apps.teacher import exceptions, models, constanst
-from web.apps.users import constanst as constanst_users, exceptions as exceptions_users
+from web.apps.users import constanst as constanst_users, exceptions as exceptions_users, models as models_users
+
+from web.utils import mixins
 from web.utils.mixins import APIWithCustomerPermissionsMixin
 from web.apps.teacher.api import serializers
 from drf_yasg2.utils import swagger_auto_schema
@@ -196,6 +198,25 @@ class SubjectsCreateAPIView(APIWithCustomerPermissionsMixin, generics.ListAPIVie
         subject = serializer.save()
         detail = serializers.SubjectSerializer(subject, many=False)
         return Response(detail.data)
+
+
+class SubjectsAPIView(mixins.APIWithUserPermissionsMixin, generics.ListAPIView):
+    serializer_class = serializers.SubjectsDetailSerializer
+    queryset = models.Subject.objects.all()
+    pagination_class = StandardResultsPagination
+
+    def get_queryset(self):
+        if not self.request.user:
+            raise exceptions_users.UserDoesNotExistsAPIException()
+
+        if self.request.user.type_user in [
+            models_users.User.UserType.ADMIN,
+            models_users.User.UserType.TEACHER,
+        ]:
+            return models.Subject.objects.filter(status=models_base.BaseModel.Status.ACTIVE).order_by("id")
+
+        else:
+            return models.Subject.objects.none()
 
 
 class SubjectActionsAPIView(APIWithCustomerPermissionsMixin, APIView):

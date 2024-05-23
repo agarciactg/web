@@ -135,3 +135,11 @@ class SubjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Subject
         fields = ("id", "teacher", "name", "description", "credis", "hours")
+
+
+class SubjectsDetailSerializer(serializers.ModelSerializer):
+    teacher = TeacherDetailSerializer(many=False, required=True)
+
+    class Meta:
+        model = models.Subject
+        fields = ("id", "teacher", "name", "description", "credis", "hours")
