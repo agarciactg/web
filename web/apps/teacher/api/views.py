@@ -51,6 +51,26 @@ class TeacherCreateAPIView(APIWithCustomerPermissionsMixin, generics.ListAPIView
         return Response(detail.data)
 
 
+class TeachersAPIView(mixins.APIWithUserPermissionsMixin, generics.ListAPIView):
+    serializer_class = serializers.TeacherDetailSerializer
+    queryset = models.Teacher.objects.all()
+    pagination_class = StandardResultsPagination
+
+    def get_queryset(self):
+        if not self.request.user:
+            raise exceptions_users.UserDoesNotExistsAPIException()
+
+        if self.request.user.type_user in [
+            models_users.User.UserType.ADMIN,
+            models_users.User.UserType.TEACHER,
+        ]:
+            return models.Teacher.objects.filter(status=models_base.BaseModel.Status.ACTIVE).order_by("id")
+
+        else:
+            return models.Teacher.objects.none()
+
+
+
 class TeacherActionsAPIView(APIWithCustomerPermissionsMixin, APIView):
     """
     Endpoint to get, update and delete a teacher
