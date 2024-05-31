@@ -396,6 +396,49 @@ class UsersListAPIView(mixins.APIWithUserPermissionsMixin, generics.ListAPIView)
             return models.User.objects.none()
 
 
+class UsersSelectTypeUsersListAPIView(mixins.APIWithUserPermissionsMixin, generics.ListAPIView):
+    serializer_class = serializers.UserDetailSerializer
+    queryset = models.User.objects.all()
+    pagination_class = None
+
+    def post(self, request, *args, **kwargs):
+        if not request.user:
+            raise user_exceptions.UserDoesNotExistsAPIException()
+
+        if self.request.user.type_user in [
+            models.User.UserType.ADMIN,
+            models.User.UserType.TEACHER,
+        ]:
+            search_users = request.data.get("type_users", None)
+            if search_users:
+                if search_users == user_constants.STUDENT:
+                    users = models.User.objects.filter(
+                        is_active=True, type_user=models.User.UserType.STUDENT
+                    ).order_by("id")
+
+                elif search_users == user_constants.TEACHER:
+                    users = models.User.objects.filter(
+                        is_active=True, type_user=models.User.UserType.TEACHER
+                    ).order_by("id")
+
+                elif search_users == user_constants.ADMIN:
+                    users = models.User.objects.filter(
+                        is_active=True, type_user=models.User.UserType.ADMIN
+                    ).order_by("id")
+                else:
+                    users = models.User.objects.none()
+
+                serializer = serializers.UserDetailSerializer(users, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            users = models.User.objects.filter(is_active=True).order_by("id")
+            serializer = serializers.UserDetailSerializer(users, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        else:
+            return Response([], status=status.HTTP_403_FORBIDDEN)
+
+
 class UserCreateAPIView(mixins.APIWithCustomerPermissionsMixin, generics.ListAPIView):
     """
     Return: Create User
