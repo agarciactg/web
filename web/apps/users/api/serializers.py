@@ -124,6 +124,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             "last_name",
             "type_document",
             "document_number",
+            "email",
             "avatar",
             "avatar_url",
         )

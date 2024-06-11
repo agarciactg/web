@@ -70,7 +70,6 @@ class TeachersAPIView(mixins.APIWithUserPermissionsMixin, generics.ListAPIView):
             return models.Teacher.objects.none()
 
 
-
 class TeacherActionsAPIView(APIWithCustomerPermissionsMixin, APIView):
     """
     Endpoint to get, update and delete a teacher
