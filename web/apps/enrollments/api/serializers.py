@@ -38,7 +38,7 @@ class AcademicGroupsDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.AcademicGroups
-        fields = ("id", "teachers", "degress_display", "name", "code")
+        fields = ("id", "teachers", "degress_display", "name", "code", "degress")
 
     def get_degress_display(self, obj):
         # Aquí obj es una instancia del modelo AcademicGroups

@@ -47,6 +47,25 @@ class UserDetailSerializer(serializers.ModelSerializer):
         return obj.get_type_document_display()
 
 
+class UserDetailTypeUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.User
+        fields = (
+            "id",
+            "type_user",
+            "first_name",
+            "last_name",
+            "username",
+            "type_document",
+            "document_number",
+            "email",
+            "avatar",
+            "avatar_url",
+            "is_active",
+        )
+
+
 class UserDetailSummarySerializer(serializers.ModelSerializer):
     type_user = serializers.CharField(source="get_type_user_display")
 

@@ -150,7 +150,7 @@ class UserActionsAPIView(mixins.APIWithCustomerPermissionsMixin, APIView):
     )
     def get(self, request, pk, format=None):
         user = self.get_objects(pk)
-        serializer = serializers.UserDetailSerializer(user)
+        serializer = serializers.UserDetailTypeUserSerializer(user)
         return Response(serializer.data)
 
     @swagger_auto_schema(
@@ -180,7 +180,7 @@ class UserActionsAPIView(mixins.APIWithCustomerPermissionsMixin, APIView):
     )
     def put(self, request, pk, format=None):
         user = self.get_objects(pk)
-        serializer = serializers.UserDetailSerializer(
+        serializer = serializers.UserCreateSerializer(
             user, data=request.data, partial=True, context={}
         )
         if serializer.is_valid(raise_exception=True):

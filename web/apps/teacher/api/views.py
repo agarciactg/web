@@ -275,7 +275,7 @@ class SubjectActionsAPIView(APIWithCustomerPermissionsMixin, APIView):
     )
     def get(self, request, id, format=None):
         teacher = self.get_objects(id)
-        serializer = serializers.SubjectSerializer(teacher)
+        serializer = serializers.SubjectsDetailSerializer(teacher)
         return Response(serializer.data)
 
     @swagger_auto_schema(
