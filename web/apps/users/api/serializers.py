@@ -47,6 +47,29 @@ class UserDetailSerializer(serializers.ModelSerializer):
         return obj.get_type_document_display()
 
 
+class UserUpdatedPersonalSerializer(serializers.ModelSerializer):
+    """
+    Return: Serializer for updated User
+    """
+
+    type_user = serializers.ChoiceField(choices=models.User.UserType.choices)
+    type_document = serializers.ChoiceField(choices=models.User.TypeDocument.choices)
+
+    class Meta:
+        model = models.User
+        fields = (
+            "username",
+            "type_user",
+            "first_name",
+            "last_name",
+            "type_document",
+            "document_number",
+            "email",
+            "avatar",
+            "avatar_url",
+        )
+
+
 class UserDetailTypeUserSerializer(serializers.ModelSerializer):
 
     class Meta:

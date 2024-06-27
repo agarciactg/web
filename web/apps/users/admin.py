@@ -47,16 +47,31 @@ class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
 
-    list_display = ("username", "first_name", "last_name", "document_number", "type_user", "date_joined", "is_active")
+    list_display = (
+        "username",
+        "first_name",
+        "last_name",
+        "document_number",
+        "type_user",
+        "date_joined",
+        "is_active",
+        "avatar",
+        "avatar_url",
+    )
     list_filter = ("type_user",)
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        (_("Personal info"), {"fields": ("first_name", "last_name", "username", "document_number")}),
+        (
+            _("Personal info"),
+            {"fields": ("first_name", "last_name", "username", "document_number")},
+        ),
         (_("Type of User"), {"fields": ("type_user",)}),
         (
             _("Admin"),
             {
                 "fields": (
+                    "avatar",
+                    "avatar_url",
                     "user_permissions",
                     "groups",
                     "is_active",
@@ -80,6 +95,8 @@ class UserAdmin(BaseUserAdmin):
                     "last_name",
                     "type_document",
                     "document_number",
+                    "avatar",
+                    "avatar_url",
                     "password1",
                     "password2",
                 ),
