@@ -9,7 +9,7 @@ from corsheaders.defaults import default_headers
 from web.config.settings.base import *  # noqa
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
@@ -30,6 +30,9 @@ ALLOWED_HOSTS = ["*"]
 
 # Static files
 STATIC_ROOT = os.path.join(ROOT_DIR, "static")  # noqa
+
+MEDIA_URL = '/media/'
+
 # Media files
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")  # noqa
 

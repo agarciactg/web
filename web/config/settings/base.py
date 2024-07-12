@@ -6,7 +6,8 @@ from pathlib import Path
 import environ
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = Path(__file__).resolve().parent.parent
+# BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ROOT_DIR = os.path.abspath(os.path.join(__file__, "../../../.."))
 APPS_DIR = os.path.join(ROOT_DIR, "web")
 
@@ -20,7 +21,8 @@ if READ_DOT_ENV_FILE:
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 # DEBUG = env.bool("DEBUG", False)
-DEBUG = 'RENDER' not in os.environ
+# DEBUG = 'RENDER' not in os.environ
+DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -61,6 +63,8 @@ LOCAL_APPS = [
     "web.apps.users",
     "web.apps.teacher",
     "web.apps.enrollments",
+    "web.apps.student",
+    "web.apps.tutor",
     "web.apps.vendors",
 ]
 
@@ -176,6 +180,7 @@ STATIC_URL = "/static/"
 # Media files
 MEDIAFILES_LOCATION = "media"
 MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Redis
 REDIS_PASSWORD = env.str("REDIS_PASSWORD", "")
@@ -249,6 +254,8 @@ MATERIAL_ADMIN_SITE = {
         "users": "person",
         "teacher": "record_voice_over",
         "enrollments": "speaker",
+        "student": "folder_shared",
+        "tutor": "assignment_ind",
         "rest_framework_api_key": "lock",
         "django_celery_beat": "history",
     },
