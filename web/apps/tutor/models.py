@@ -32,8 +32,8 @@ class Tutor(BaseModel):
     type_of_housing = models.PositiveSmallIntegerField(
         verbose_name="Tipo de Usuario", choices=TypeOfHousing.choices, null=True, blank=True
     )
-    vehicle = models.BooleanField("Tiene vehiculo?", default=False)
-    it_financial = models.BooleanField("Es acudiente financiero?", default=False)
+    vehicle = models.BooleanField("Tiene vehiculo?", default=False, blank=True, null=True)
+    it_financial = models.BooleanField("Es acudiente financiero?", default=False, blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"

@@ -9,6 +9,23 @@ from web.apps.users.api.serializers import UserDetailSummarySerializer
 from web.apps.users.models import User
 
 
+def create_user(data, type_user):
+    user_data = {
+        "username": data.pop("username"),
+        "type_user": type_user,
+        "first_name": data.pop("first_name"),
+        "last_name": data.pop("last_name"),
+        "type_document": data.pop("type_document"),
+        "document_number": data.pop("document_number"),
+        "email": data.pop("email", None),  # Email opcional
+        "avatar": data.pop("avatar", None),
+        "avatar_url": data.pop("avatar_url", None),
+    }
+    user = User.objects.create(**user_data)
+    user.save()
+    return user
+
+
 class InscriptionCreateSerializer(serializers.Serializer):
     """
     Serializer to create and update an inscription
@@ -56,25 +73,11 @@ class InscriptionCreateSerializer(serializers.Serializer):
         write_only=True, allow_null=True, allow_blank=True, required=False
     )
 
-    # Data usuario - _t_three = tutor three
-    first_name_t_three = serializers.CharField(write_only=True)
-    last_name_t_three = serializers.CharField(write_only=True)
-    email_t_three = serializers.CharField(write_only=True)
-    type_document_t_three = serializers.IntegerField(write_only=True)
-    document_number_t_three = serializers.IntegerField(write_only=True)
-    avatar_t_three = serializers.ImageField(
-        max_length=None, use_url=True, allow_null=True, required=False
-    )
-    username_t_three = serializers.CharField(write_only=True, required=True)
-    avatar_url_t_three = serializers.URLField(
-        write_only=True, allow_null=True, allow_blank=True, required=False
-    )
-
     # Data candidate
     place_of_bird = serializers.CharField(write_only=True, max_length=350)
     date_of_bird = serializers.DateField(write_only=True)
     years = serializers.IntegerField(write_only=True)
-    gender = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    # gender = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     laterality = serializers.IntegerField(write_only=True)
     degrees = serializers.IntegerField(write_only=True)
     elective_year = serializers.IntegerField(write_only=True)
@@ -83,7 +86,7 @@ class InscriptionCreateSerializer(serializers.Serializer):
     neighborhood = serializers.CharField(write_only=True, max_length=350)
     stratum = serializers.IntegerField(write_only=True)
     phone = serializers.CharField(write_only=True, max_length=350, required=False, allow_null=True)
-    email = serializers.CharField(write_only=True, max_length=350)
+    # email = serializers.CharField(write_only=True, max_length=350, required=False, allow_null=True)
 
     # Data tutor 1
     phone_tutor_t_one = serializers.CharField(
@@ -104,8 +107,8 @@ class InscriptionCreateSerializer(serializers.Serializer):
     type_of_housing_t_one = serializers.IntegerField(
         write_only=True, required=False, allow_null=True
     )
-    vehicle_t_one = serializers.BooleanField(write_only=True, default=False)
-    it_financial_t_one = serializers.BooleanField(write_only=True, default=False)
+    vehicle_t_one = serializers.BooleanField(write_only=True, default=False, required=False, allow_null=True)
+    it_financial_t_one = serializers.BooleanField(write_only=True, default=False, required=False, allow_null=True)
 
     # Data tutor 2
     phone_tutor_t_two = serializers.CharField(
@@ -126,30 +129,8 @@ class InscriptionCreateSerializer(serializers.Serializer):
     type_of_housing_t_two = serializers.IntegerField(
         write_only=True, required=False, allow_null=True
     )
-    vehicle_t_two = serializers.BooleanField(write_only=True, default=False)
-    it_financial_t_two = serializers.BooleanField(write_only=True, default=False)
-
-    # Data tutor 3
-    phone_tutor_t_three = serializers.CharField(
-        write_only=True, max_length=350, required=False, allow_null=True
-    )
-    profession_t_three = serializers.CharField(
-        write_only=True, max_length=350, required=False, allow_null=True
-    )
-    workplace_t_three = serializers.CharField(
-        write_only=True, max_length=350, required=False, allow_null=True
-    )
-    phone_number_work_t_three = serializers.CharField(
-        write_only=True, max_length=350, required=False, allow_null=True
-    )
-    monthly_income_t_three = serializers.CharField(
-        write_only=True, max_length=350, required=False, allow_null=True
-    )
-    type_of_housing_t_three = serializers.IntegerField(
-        write_only=True, required=False, allow_null=True
-    )
-    vehicle_t_three = serializers.BooleanField(write_only=True, default=False)
-    it_financial_t_three = serializers.BooleanField(write_only=True, default=False)
+    vehicle_t_two = serializers.BooleanField(write_only=True, default=False, required=False, allow_null=True)
+    it_financial_t_two = serializers.BooleanField(write_only=True, default=False, required=False, allow_null=True)
 
     # Data inscription
     civil_registration = serializers.FileField(write_only=True, required=False, allow_null=True)
@@ -162,156 +143,80 @@ class InscriptionCreateSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         with atomic():
-            user_candidate_data = {
-                "username": validated_data.pop("username_c"),
-                "type_user": 5,  # Es un estudiante, pero le falta validacion
-                "first_name": validated_data.pop("first_name_c"),
-                "last_name": validated_data.pop("last_name_c"),
-                "type_document": validated_data.pop("type_document_c"),
-                "document_number": validated_data.pop("document_number_c"),
-                "email": validated_data.pop("email_c"),
-                "avatar": validated_data.pop("avatar_c", None),
-                "avatar_url": validated_data.pop("avatar_url_c", None),
-            }
-
-            user_tutor_one_data = {
-                "username": validated_data.pop("username_t_one"),
-                "type_user": 6,  # tipo de usuario Acudiente
-                "first_name": validated_data.pop("first_name_t_one"),
-                "last_name": validated_data.pop("last_name_t_one"),
-                "type_document": validated_data.pop("type_document_t_one"),
-                "document_number": validated_data.pop("document_number_t_one"),
-                # "email": validated_data.pop("email_t_one"),
-                "avatar": validated_data.pop("avatar_t_one", None),
-                "avatar_url": validated_data.pop("avatar_url_t_one", None),
-            }
-
-            user_tutor_two_data = {
-                "username": validated_data.pop("username_t_two"),
-                "type_user": 6,  # tipo de usuario Acudiente
-                "first_name": validated_data.pop("first_name_t_two"),
-                "last_name": validated_data.pop("last_name_t_two"),
-                "type_document": validated_data.pop("type_document_t_two"),
-                "document_number": validated_data.pop("document_number_t_two"),
-                "email": validated_data.pop("email_t_two"),
-                "avatar": validated_data.pop("avatar_t_two", None),
-                "avatar_url": validated_data.pop("avatar_url_t_two", None),
-            }
-
-            user_tutor_three_data = {
-                "username": validated_data.pop("username_t_three"),
-                "type_user": 6,  # tipo de usuario Acudiente
-                "first_name": validated_data.pop("first_name_t_three"),
-                "last_name": validated_data.pop("last_name_t_three"),
-                "type_document": validated_data.pop("type_document_t_three"),
-                "document_number": validated_data.pop("document_number_t_three"),
-                "email": validated_data.pop("email_t_three"),
-                "avatar": validated_data.pop("avatar_t_three", None),
-                "avatar_url": validated_data.pop("avatar_url_t_three", None),
-            }
-
-            # informacion de candidato uno
-            candidate_data = {
-                "place_of_bird": validated_data.pop("place_of_bird"),
-                "date_of_bird": validated_data.pop("date_of_bird"),
-                "years": validated_data.pop("years"),
-                "gender": validated_data.pop("gender"),
-                "laterality": validated_data.pop("laterality"),
-                "degrees": validated_data.pop("degrees"),
-                "elective_year": validated_data.pop("elective_year"),
-                "address": validated_data.pop("address"),
-                "city": validated_data.pop("city"),
-                "neighborhood": validated_data.pop("neighborhood"),
-                "stratum": validated_data.pop("stratum"),
-                # "phone": validated_data.pop("phone"),
-                "email": validated_data.pop("email"),
-            }
-
-            # informacion de tutor uno
-            tutor_one_data = {
-                "phone": validated_data.pop("phone_tutor_t_one"),
-                "profession": validated_data.pop("profession_t_one"),
-                "email": validated_data.pop("email_t_one"),
-                "workplace": validated_data.pop("workplace_t_one"),
-                "phone_number_work": validated_data.pop("phone_number_work_t_one"),
-                "monthly_income": validated_data.pop("monthly_income_t_one"),
-                "type_of_housing": validated_data.pop("type_of_housing_t_one"),
-                "vehicle": validated_data.pop("vehicle_t_one"),
-                "it_financial": validated_data.pop("it_financial_t_one"),
-            }
-
-            # informacion de tutor dos
-            tutor_two_data = {
-                "phone": validated_data.pop("phone_tutor_t_two"),
-                "profession": validated_data.pop("profession_t_two"),
-                # "email": validated_data.pop("email_t_two"),
-                "workplace": validated_data.pop("workplace_t_two"),
-                "phone_number_work": validated_data.pop("phone_number_work_t_two"),
-                "monthly_income": validated_data.pop("monthly_income_t_two"),
-                "type_of_housing": validated_data.pop("type_of_housing_t_two"),
-                "vehicle": validated_data.pop("vehicle_t_two"),
-                "it_financial": validated_data.pop("it_financial_t_two"),
-            }
-
-            # informacion de tutor tres
-            tutor_three_data = {
-                "phone": validated_data.pop("phone_tutor_t_three"),
-                "profession": validated_data.pop("profession_t_three"),
-                # "email": validated_data.pop("email_t_three"),
-                "workplace": validated_data.pop("workplace_t_three"),
-                "phone_number_work": validated_data.pop("phone_number_work_t_three"),
-                "monthly_income": validated_data.pop("monthly_income_t_three"),
-                "type_of_housing": validated_data.pop("type_of_housing_t_three"),
-                "vehicle": validated_data.pop("vehicle_t_three"),
-                "it_financial": validated_data.pop("it_financial_t_three"),
-            }
-
-            inscription_data = {
-                "civil_registration": validated_data.pop("civil_registration"),
-                "vaccination_card": validated_data.pop("vaccination_card"),
-                "identity_card": validated_data.pop("identity_card"),
-                "last_newsletter": validated_data.pop("last_newsletter"),
-                "work_record": validated_data.pop("work_record"),
-                "photo_license": validated_data.pop("photo_license"),
-                "registration_receipt": validated_data.pop("registration_receipt"),
-            }
-
-            # Save the information of the users
-            user_candidate = User.objects.create(**user_candidate_data)
-            user_candidate.save()
-
-            # informacion tutors
-            user_tutor_one = User.objects.create(**user_tutor_one_data)
-            user_tutor_one.save()
-
-            user_tutor_two = User.objects.create(**user_tutor_two_data)
-            user_tutor_two.save()
-
-            user_tutor_three = User.objects.create(**user_tutor_three_data)
-            user_tutor_three.save()
-
-            # creacion de candidato
-            candidate = Candidate.objects.create(user=user_candidate, **candidate_data)
+            # Crear usuario candidato
+            user_candidate = self.create_user(validated_data, "_c")
+            candidate = Candidate.objects.create(user=user_candidate, **self.extract_candidate_data(validated_data))
             candidate.save()
 
-            # creacion de tutors
-            tutor_one = Tutor.objects.create(user=user_tutor_one, **tutor_one_data)
-            tutor_one.save()
+            # Crear tutores
+            tutors = []
+            for tutor_key in ["_t_one", "_t_two"]:
+                user_tutor = self.create_user(validated_data, tutor_key)
+                tutor_data = self.extract_tutor_data(validated_data, tutor_key)
+                tutor = Tutor.objects.create(user=user_tutor, **tutor_data)
+                tutor.save()
+                tutors.append(tutor)
 
-            tutor_two = Tutor.objects.create(user=user_tutor_two, **tutor_two_data)
-            tutor_two.save()
-
-            tutor_three = Tutor.objects.create(user=user_tutor_three, **tutor_three_data)
-            tutor_three.save()
-
-            # creacion de inscripción
+            # Crear inscripción
+            inscription_data = self.extract_inscription_data(validated_data)
             inscription = Inscription.objects.create(candidate=candidate, **inscription_data)
-
-            # agregar tutores a la inscripción
-            inscription.tutors.add(tutor_one, tutor_two, tutor_three)
+            inscription.tutors.add(*tutors)
             inscription.save()
 
         return inscription
+
+    def create_user(self, validated_data, suffix):
+        user_data = {
+            "username": validated_data.pop(f"username{suffix}"),
+            "type_user": 5,  # tipo de usuario Estudiante
+            "first_name": validated_data.pop(f"first_name{suffix}"),
+            "last_name": validated_data.pop(f"last_name{suffix}"),
+            "type_document": validated_data.pop(f"type_document{suffix}"),
+            "document_number": validated_data.pop(f"document_number{suffix}"),
+            "email": validated_data.pop(f"email{suffix}", None),  # Email opcional
+            "avatar": validated_data.pop(f"avatar{suffix}", None),
+            "avatar_url": validated_data.pop(f"avatar_url{suffix}", None),
+        }
+        return User.objects.create(**user_data)
+
+    def extract_tutor_data(self, validated_data, suffix):
+        return {
+            "phone": validated_data.pop(f"phone_tutor{suffix}"),
+            "profession": validated_data.pop(f"profession{suffix}"),
+            "workplace": validated_data.pop(f"workplace{suffix}"),
+            "phone_number_work": validated_data.pop(f"phone_number_work{suffix}"),
+            "monthly_income": validated_data.pop(f"monthly_income{suffix}"),
+            "type_of_housing": validated_data.pop(f"type_of_housing{suffix}"),
+            "vehicle": validated_data.pop(f"vehicle{suffix}"),
+            "it_financial": validated_data.pop(f"it_financial{suffix}"),
+        }
+
+    def extract_candidate_data(self, validated_data):
+        return {
+            "place_of_bird": validated_data.pop("place_of_bird"),
+            "date_of_bird": validated_data.pop("date_of_bird"),
+            "years": validated_data.pop("years"),
+            # "gender": validated_data.pop("gender"),
+            "laterality": validated_data.pop("laterality"),
+            "degrees": validated_data.pop("degrees"),
+            "elective_year": validated_data.pop("elective_year"),
+            "address": validated_data.pop("address"),
+            "city": validated_data.pop("city"),
+            "neighborhood": validated_data.pop("neighborhood"),
+            "stratum": validated_data.pop("stratum"),
+            # "email": validated_data.pop("email"),
+        }
+
+    def extract_inscription_data(self, validated_data):
+        return {
+            "civil_registration": validated_data.pop("civil_registration"),
+            "vaccination_card": validated_data.pop("vaccination_card"),
+            "identity_card": validated_data.pop("identity_card"),
+            "last_newsletter": validated_data.pop("last_newsletter"),
+            "work_record": validated_data.pop("work_record"),
+            "photo_license": validated_data.pop("photo_license"),
+            "registration_receipt": validated_data.pop("registration_receipt"),
+        }
 
 
 class TutorDetailSerializer(serializers.ModelSerializer):
