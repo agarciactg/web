@@ -149,6 +149,19 @@ class SetPasswordSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
 
+class UserUpdatedPersonalSettingsSerializer(serializers.ModelSerializer):
+    """
+    Return: Serializer for created User
+    """
+
+    class Meta:
+        model = models.User
+        fields = (
+            "first_name",
+            "last_name",
+        )
+
+
 class UserCreateSerializer(serializers.ModelSerializer):
     """
     Return: Serializer for created User

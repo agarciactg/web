@@ -77,7 +77,7 @@ class InscriptionCreateSerializer(serializers.Serializer):
     place_of_bird = serializers.CharField(write_only=True, max_length=350)
     date_of_bird = serializers.DateField(write_only=True)
     years = serializers.IntegerField(write_only=True)
-    # gender = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    gender = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     laterality = serializers.IntegerField(write_only=True)
     degrees = serializers.IntegerField(write_only=True)
     elective_year = serializers.IntegerField(write_only=True)
@@ -196,7 +196,7 @@ class InscriptionCreateSerializer(serializers.Serializer):
             "place_of_bird": validated_data.pop("place_of_bird"),
             "date_of_bird": validated_data.pop("date_of_bird"),
             "years": validated_data.pop("years"),
-            # "gender": validated_data.pop("gender"),
+            "gender": validated_data.pop("gender"),
             "laterality": validated_data.pop("laterality"),
             "degrees": validated_data.pop("degrees"),
             "elective_year": validated_data.pop("elective_year"),

@@ -34,6 +34,11 @@ urlpatterns = [
         name="user_updated",
     ),
     path(
+        "api/v1/users/settings/<int:pk>/",
+        views.UserUpdatedPersonaDataAPIView.as_view(),
+        name="user_updated-personal",
+    ),
+    path(
         "api/v1/users/updated-personal/<int:pk>/",
         views.UserActionsPersonalAPIView.as_view(),
         name="user_updated_with_pk",

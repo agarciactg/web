@@ -111,6 +111,54 @@ class UserDetailView(mixins.APIBasePermissionsMixin, generics.RetrieveAPIView):
         return Response(data=serializer.data)
 
 
+class UserUpdatedPersonaDataAPIView(mixins.APIWithCustomerPermissionsMixin, APIView):
+    """
+    This endpoint is to updated data persona by type users
+    """
+
+    def get_objects(self, pk):
+        try:
+            return models.User.objects.get(id=pk)
+        except models.User.DoesNotExist:
+            raise user_exceptions.UserDoesNotExistsAPIException()
+
+    @swagger_auto_schema(
+        operation_description="Endpoint para actualizar la informacion de un usuario personalizado",
+        request_body=base_serializer.ExceptionSerializer(many=False),
+        responses={
+            200: serializers.UserDetailSerializer(many=True),
+            401: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description="",
+                schema=base_serializer.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": user_exceptions.UserUnauthorizedAPIException().get_full_details()
+                },
+            ),
+            404: openapi.Response(
+                type=openapi.TYPE_OBJECT,
+                description="",
+                schema=base_serializer.ExceptionSerializer(many=False),
+                examples={
+                    "application/json": [
+                        user_exceptions.UserDoesNotExistsAPIException().get_full_details()
+                    ]
+                },
+            ),
+        },
+    )
+    def put(self, request, pk, format=None):
+        user = self.get_objects(pk)
+        serializer = serializers.UserUpdatedPersonalSettingsSerializer(
+            user, data=request.data, partial=True, context={}
+        )
+        if serializer.is_valid(raise_exception=True):
+            user_updated = serializer.save()
+            detail = serializers.UserDetailSerializer(user_updated, many=False)
+            return Response(detail.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class UserActionsAPIView(mixins.APIWithCustomerPermissionsMixin, APIView):
     """
     Endpoint to desactivate an user
