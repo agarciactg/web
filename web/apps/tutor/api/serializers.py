@@ -107,8 +107,12 @@ class InscriptionCreateSerializer(serializers.Serializer):
     type_of_housing_t_one = serializers.IntegerField(
         write_only=True, required=False, allow_null=True
     )
-    vehicle_t_one = serializers.BooleanField(write_only=True, default=False, required=False, allow_null=True)
-    it_financial_t_one = serializers.BooleanField(write_only=True, default=False, required=False, allow_null=True)
+    vehicle_t_one = serializers.BooleanField(
+        write_only=True, default=False, required=False, allow_null=True
+    )
+    it_financial_t_one = serializers.BooleanField(
+        write_only=True, default=False, required=False, allow_null=True
+    )
 
     # Data tutor 2
     phone_tutor_t_two = serializers.CharField(
@@ -129,8 +133,12 @@ class InscriptionCreateSerializer(serializers.Serializer):
     type_of_housing_t_two = serializers.IntegerField(
         write_only=True, required=False, allow_null=True
     )
-    vehicle_t_two = serializers.BooleanField(write_only=True, default=False, required=False, allow_null=True)
-    it_financial_t_two = serializers.BooleanField(write_only=True, default=False, required=False, allow_null=True)
+    vehicle_t_two = serializers.BooleanField(
+        write_only=True, default=False, required=False, allow_null=True
+    )
+    it_financial_t_two = serializers.BooleanField(
+        write_only=True, default=False, required=False, allow_null=True
+    )
 
     # Data inscription
     civil_registration = serializers.FileField(write_only=True, required=False, allow_null=True)
@@ -145,7 +153,9 @@ class InscriptionCreateSerializer(serializers.Serializer):
         with atomic():
             # Crear usuario candidato
             user_candidate = self.create_user(validated_data, "_c")
-            candidate = Candidate.objects.create(user=user_candidate, **self.extract_candidate_data(validated_data))
+            candidate = Candidate.objects.create(
+                user=user_candidate, **self.extract_candidate_data(validated_data)
+            )
             candidate.save()
 
             # Crear tutores
@@ -166,17 +176,31 @@ class InscriptionCreateSerializer(serializers.Serializer):
         return inscription
 
     def create_user(self, validated_data, suffix):
-        user_data = {
-            "username": validated_data.pop(f"username{suffix}"),
-            "type_user": 5,  # tipo de usuario Estudiante
-            "first_name": validated_data.pop(f"first_name{suffix}"),
-            "last_name": validated_data.pop(f"last_name{suffix}"),
-            "type_document": validated_data.pop(f"type_document{suffix}"),
-            "document_number": validated_data.pop(f"document_number{suffix}"),
-            "email": validated_data.pop(f"email{suffix}", None),  # Email opcional
-            "avatar": validated_data.pop(f"avatar{suffix}", None),
-            "avatar_url": validated_data.pop(f"avatar_url{suffix}", None),
-        }
+        if suffix in ["_t_one", "_t_two"]:
+            user_data = {
+                "username": validated_data.pop(f"username{suffix}"),
+                "type_user": 6,  # tipo de usuario Acudiente
+                "first_name": validated_data.pop(f"first_name{suffix}"),
+                "last_name": validated_data.pop(f"last_name{suffix}"),
+                "type_document": validated_data.pop(f"type_document{suffix}"),
+                "document_number": validated_data.pop(f"document_number{suffix}"),
+                "email": validated_data.pop(f"email{suffix}", None),  # Email opcional
+                "avatar": validated_data.pop(f"avatar{suffix}", None),
+                "avatar_url": validated_data.pop(f"avatar_url{suffix}", None),
+            }
+
+        else:
+            user_data = {
+                "username": validated_data.pop(f"username{suffix}"),
+                "type_user": 5,  # tipo de usuario Estudiante
+                "first_name": validated_data.pop(f"first_name{suffix}"),
+                "last_name": validated_data.pop(f"last_name{suffix}"),
+                "type_document": validated_data.pop(f"type_document{suffix}"),
+                "document_number": validated_data.pop(f"document_number{suffix}"),
+                "email": validated_data.pop(f"email{suffix}", None),  # Email opcional
+                "avatar": validated_data.pop(f"avatar{suffix}", None),
+                "avatar_url": validated_data.pop(f"avatar_url{suffix}", None),
+            }
         return User.objects.create(**user_data)
 
     def extract_tutor_data(self, validated_data, suffix):
