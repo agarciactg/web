@@ -55,3 +55,13 @@ class CandidateDetailSerializer(serializers.ModelSerializer):
             "phone",
             "email",
         )
+
+
+class StudentDetailSerializer(serializers.ModelSerializer):
+    candiate = CandidateDetailSerializer(many=False)
+
+    class Meta:
+        model = models.Student
+        fields = (
+            "candiate",
+        )

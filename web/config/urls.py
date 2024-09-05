@@ -28,6 +28,7 @@ urlpatterns = [
     path("", include("web.apps.teacher.api.urls")),
     path("", include("web.apps.enrollments.api.urls")),
     path("", include("web.apps.tutor.api.urls")),
+    path("", include("web.apps.student.api.urls")),
     # Temporary redirect
     path("", RedirectView.as_view(url="admin/")),
     # Documentation
